@@ -215,7 +215,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         existing_post = wp.get_post_by_slug(blog.slug)
         if existing_post:
             logging.error(
-                "a post with the same slug already exists, %a", existing_post.guid
+                "a post with the same slug already exists, %s", existing_post.link
             )
             return 1
 
@@ -224,20 +224,24 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         blog.save()
         logging.info("uploaded blog '%s' as post %s", blog.title, post.link)
 
-    banner = wp.upload_media(f"{blog.slug}-image", blog.banner)
-    if post.featured_media != banner.medium_id:
-        logging.info("updated featured image of as %s", post.guid)
-        wp.update_post(blog.guid, {"featured_media": banner.medium_id})
-
     if blog.og_banner:
         og_banner = wp.upload_media(f"{blog.slug}-og-image", blog.og_banner)
-        wp.update_post(
-            blog.guid,
-            {
-                "meta": {
-                    "yoast_wpseo_opengraph-image": og_banner.medium_id,
-                }
-            },
-        )
+        post_og_banners = post.get("yoast_head_json", {}).get("og_image", [])
+        if not next(
+            filter(lambda b: b.get("url") == og_banner.url, post_og_banners), None
+        ):
+            logging.info("updating opengraph image to %s", og_banner.url)
+            updated_post = wp.update_post(
+                blog.guid,
+                {
+                    "meta": {
+                        "yoast_wpseo_opengraph-image": og_banner.url,
+                    }
+                },
+            )
+
+    banner = wp.upload_media(f"{blog.slug}-image", blog.banner)
+    if post.featured_media != banner.medium_id:
+        wp.update_post(blog.guid, {"featured_media": banner.medium_id})
 
     return 0

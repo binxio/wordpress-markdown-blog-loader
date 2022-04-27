@@ -3,7 +3,6 @@ author: Mark van Holsteijn
 categories:
 - uncategorized
 date: 2020-02-15 23:21:00+01:00
-guid: https://blog.mark.binx.dev/wp-json/wp/v2/posts/66
 og:
   description: using Google Cloud Run and Cloud Scheduler
 slug: try-this-one
