@@ -10,3 +10,7 @@ in your favorite editor and keeps all your blogs in git.
 ## caveats
 - changing the slug leaves may orphan blog and images
 - removing images from the markdown, will leave dangling images in Wordpress
+
+## required Wordpress Plugins
+- [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/)
+- [REST API Meta Support](https://wordpress.org/plugins/rest-api-meta-support/)
