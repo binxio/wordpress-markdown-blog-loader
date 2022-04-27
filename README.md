@@ -14,3 +14,17 @@ in your favorite editor and keeps all your blogs in git.
 ## required Wordpress Plugins
 - [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/)
 - [REST API Meta Support](https://wordpress.org/plugins/rest-api-meta-support/)
+
+## configuration
+to configure the access credentials, add the file `~/.wordpress.ini` and add a section
+for your Wordpress installation:
+
+```
+[DEFAULT]
+host = example.com
+
+[example.com]
+api_host = example.wpengine.com
+username = <your wordpress username>
+password = <your application passwoird>
+```
