@@ -20,7 +20,7 @@ def main():
 @click.argument(
     "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
 )
-def sync(host: str, blog: str):
+def upload(host: str, blog: str):
     """
     the wordpress blog post.
 
