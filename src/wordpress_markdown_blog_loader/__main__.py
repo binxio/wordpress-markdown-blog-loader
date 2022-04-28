@@ -2,8 +2,8 @@ import os
 import logging
 
 import click
-from wp_md_blog_loader.api import Wordpress
-from wp_md_blog_loader.load import upsert_post, Blog
+from wordpress_markdown_blog_loader.api import Wordpress
+from wordpress_markdown_blog_loader.load import upsert_post, Blog
 
 
 @click.group()

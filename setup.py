@@ -19,7 +19,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="wp-md-blog-loader",
+    name="wordpress-markdown-blog-loader",
     version="0.2.0",
     url="https://github.com/binxio/wp-md-blog-loader",
     license="APL2",
@@ -38,7 +38,7 @@ setup(
     tests_require=dependencies + [],
     test_suite="tests",
     entry_points={
-        "console_scripts": ["wp-md-blog-loader = wp_md_blog_loader.__main__:main"],
+        "console_scripts": ["wp-blog = wordpress_markdown_blog_loader.__main__:main"],
     },
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
