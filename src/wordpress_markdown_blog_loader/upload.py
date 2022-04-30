@@ -2,9 +2,9 @@ import datetime
 import logging
 from datetime import datetime
 
-from api import Wordpress
 from urllib.parse import urlparse
 from wordpress_markdown_blog_loader.blog import Blog
+from wordpress_markdown_blog_loader.api import Wordpress
 
 
 def upsert_post(wp: Wordpress, blog: Blog) -> int:

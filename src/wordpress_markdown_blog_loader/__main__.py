@@ -12,6 +12,9 @@ from wordpress_markdown_blog_loader.blog import Blog
 
 @click.group()
 def main():
+    """
+    Wordpress Markdown up- and download.
+    """
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"), format="%(levelname)s: %(message)s"
     )
@@ -26,7 +29,7 @@ def main():
 )
 def upload(host: str, blog: str):
     """
-    the wordpress blog post.
+    the wordpress blog post to Wordpress.
 
     Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
     """
@@ -57,7 +60,12 @@ def upload(host: str, blog: str):
     help="to download to",
 )
 def download(host: str, directory: str):
+    """
+    all wordpress posts as markdown.
 
+    Reads all the posts from a Wordpress installation and writes each post as frontmatter
+    document.
+    """
     wordpress = Wordpress(host)
     wordpress.connect()
 

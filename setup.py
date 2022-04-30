@@ -24,7 +24,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="wordpress-markdown-blog-loader",
-    version="0.2.0",
+    version="0.3.0",
     url="https://github.com/binxio/wp-md-blog-loader",
     license="APL2",
     author="Mark van Holsteijn",
