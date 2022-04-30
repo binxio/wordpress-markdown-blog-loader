@@ -2,13 +2,16 @@
 author: Mark van Holsteijn
 categories:
 - uncategorized
+status: publish
 date: 2020-02-15 23:21:00+01:00
 og:
   description: using Google Cloud Run and Cloud Scheduler
+  image: images/og-banner.jpg
 slug: try-this-one
 status: publish
 subtitle: using Google Cloud Run and Cloud Scheduler
 title: Testing markdown upload through wordpress API
+image: images/banner.jpg
 ---
 
 Google [Cloud Run](https://cloud.google.com/run/) is an easy way to deploy your serverless containerized applications. If you need to run your application periodically, you can use Google [Cloud Scheduler](https://cloud.google.com/scheduler/) to do so. In  this blog I will show you how to configure a schedule for a serverless application using [Terraform](https://www.terraform.io).

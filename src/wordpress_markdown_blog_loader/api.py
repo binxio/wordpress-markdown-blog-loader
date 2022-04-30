@@ -1,15 +1,13 @@
 import configparser
-import hashlib
 import logging
-import os.path
-import re
 from io import BytesIO
 from os.path import expanduser
-from pathlib import Path
-from typing import List, Dict
-from typing import Optional
-from urllib.parse import urlparse
+from typing import List, Dict, Iterator
+from typing import Optional, Union, Any
+from urllib.parse import urlparse, ParseResult
+from datetime import datetime
 
+import pytz
 import requests
 from PIL import Image
 
@@ -35,6 +33,10 @@ class WordpressEndpoint:
         self.url = f"https://{self.api_host}/wp-json/wp/v2"
         self.username = config.get(host, "username")
         self.password = config.get(host, "password")
+
+    def is_host_for(self, url: Union[str, ParseResult]) -> bool:
+        result = url if isinstance(url, ParseResult) else urlparse(url)
+        return result.hostname in [self.host, self.api_host]
 
     def normalize_url(self, url: str) -> str:
         """
@@ -86,8 +88,10 @@ class Wordpress(object):
     def normalize_url(self, url: str) -> str:
         return self.endpoint.normalize_url(url)
 
-    def get_all(self, resource: str, query: dict = None) -> List[dict]:
-        result = []
+    def is_host_for(self, url: Union[str, ParseResult]) -> bool:
+        return self.endpoint.is_host_for(url)
+
+    def get_all(self, resource: str, query: dict = None) -> Iterator[dict]:
         params = query.copy() if query else {}
         params["per_page"] = "50"
         page = 1
@@ -101,30 +105,35 @@ class Wordpress(object):
                 headers=self.headers,
             )
             if response.status_code == 200:
-                result.extend(response.json())
+                for object in response.json():
+                    yield object
                 total_pages = int(response.headers["X-WP-TotalPages"])
                 page = page + 1
             else:
                 print(f"failed to get all {resource}: {response.text}")
                 exit(1)
 
-        return result
+        return None
 
     def users(self, query: dict = None) -> List["User"]:
         return list(map(lambda u: User(u), self.get_all("users", query)))
 
+    def get_user_by_id(self, resource_id: int) -> "User":
+        return User(self.get("users", resource_id))
+
     def get_unique_user_by_name(self, name: str) -> "User":
         users = self.users({"search": name})
         if len(users) == 0:
-            raise ValueError("author %s not found as user of %s", name, self.host)
+            raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
         elif len(users) > 1:
             raise ValueError(
-                "author name '%s' results in multiple matches in %s", name, self.host
+                f"author name '{name}' results in multiple matches in {self.endpoint.host}"
             )
         return users[0]
 
-    def posts(self, query: dict = None) -> List["Post"]:
-        return list(map(lambda u: Post(u), self.get_all("posts", query)))
+    def posts(self, query: dict = None) -> Iterator["Post"]:
+        for p in self.get_all("posts", query):
+            yield Post(p)
 
     def get_post_by_slug(self, slug: str) -> Optional["Post"]:
         return next(
@@ -166,6 +175,11 @@ class Wordpress(object):
             return next(filter(lambda i: slug in [i.slug, i.title], matches), None)
         else:
             return None
+
+    def get_media(self, url: str) -> bytes:
+        response = self.session.get(url, stream=True, auth=self.auth)
+        assert response.status_code == 200
+        return response.content
 
     def upload_media(self, slug: str, image: Image) -> "Medium":
         old_content = []
@@ -259,9 +273,7 @@ class Wordpress(object):
             raise Exception(response.text)
 
     def get(self, resource, resource_id) -> Optional[dict]:
-        return self.get_resource_by_url(
-            f"{self.url}/{resource}/{resource_id}", headers=self.headers, auth=self.auth
-        )
+        return self.get_resource_by_url(f"{self.url}/{resource}/{resource_id}")
 
     def connect(self):
         global categories
@@ -335,3 +347,44 @@ class Post(dict):
     @featured_media.setter
     def featured_media(self, medium_id: int):
         self["featured_media"] = medium_id
+
+    @property
+    def content(self) -> Optional[str]:
+        return self.get("content", {}).get("rendered")
+
+    @property
+    def categories(self) -> list[id]:
+        return self.get("categories", [])
+
+    @property
+    def author(self) -> int:
+        return self["author"]
+
+    @property
+    def excerpt(self) -> Optional[str]:
+        return self.get("excerpt", {}).get("rendered")
+
+    @excerpt.setter
+    def exerpt(self, exerpt):
+        self["excerpt"] = exerpt
+
+    @property
+    def date(self) -> datetime:
+        return (
+            pytz.timezone("utc")
+            .localize(datetime.fromisoformat(self.get("date_gmt")))
+            .astimezone()
+        )
+
+    @date.setter
+    def date(self, new_date: datetime):
+        self["date"] = new_date
+        self["date_gmt"] = new_date.astimezone(pytz.timezone("utc"))
+
+    @property
+    def status(self):
+        return self["status"]
+
+    @status.setter
+    def status(self, new_status):
+        self["status"] = new_status

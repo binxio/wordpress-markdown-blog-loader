@@ -12,6 +12,10 @@ dependencies = [
     "pytz",
     "Pillow",
     "binx-og-image-generator",
+    "markdownify",
+    "bs4",
+    "html5lib",
+    "lxml",
 ]
 
 this_directory = path.abspath(path.dirname(__file__))
@@ -38,7 +42,7 @@ setup(
     tests_require=dependencies + [],
     test_suite="tests",
     entry_points={
-        "console_scripts": ["wp-blog = wordpress_markdown_blog_loader.__main__:main"],
+        "console_scripts": ["wp-md = wordpress_markdown_blog_loader.__main__:main"],
     },
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
