@@ -1,26 +1,33 @@
+import logging
 import os
 import sys
-import logging
 from pathlib import Path
 
 import click
-import markdownify
 from wordpress_markdown_blog_loader.api import Wordpress
-from wordpress_markdown_blog_loader.upload import upsert_post
 from wordpress_markdown_blog_loader.blog import Blog
+from wordpress_markdown_blog_loader.upload import upsert_post
 
 
 @click.group()
 def main():
     """
-    Wordpress Markdown up- and download.
+    Wordpress CLI
     """
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"), format="%(levelname)s: %(message)s"
     )
 
 
-@main.command()
+@main.group()
+def posts():
+    """
+    Wordpress posts up- and download
+    """
+    pass
+
+
+@posts.command()
 @click.option(
     "--host", type=str, required=True, nargs=1, help="wordpress host to upload to"
 )
@@ -48,7 +55,7 @@ def upload(host: str, blog: str):
         sys.exit(1)
 
 
-@main.command()
+@posts.command()
 @click.option(
     "--host", type=str, required=True, nargs=1, help="wordpress host to upload to"
 )
@@ -69,10 +76,11 @@ def download(host: str, directory: str):
     wordpress = Wordpress(host)
     wordpress.connect()
 
-    for post in wordpress.posts({}):
+    for post in wordpress.posts({"context": "edit"}):
         blog = Blog.from_wordpress(post, directory, wordpress)
         blog.download_remote_images(wordpress)
         logging.info("writing %s", blog.path)
+        blog.remove_empty_lines()
         blog.save()
 
         with open(f"{blog.dir}/index.html", "w") as file:

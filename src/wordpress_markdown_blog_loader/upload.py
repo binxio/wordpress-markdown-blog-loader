@@ -1,10 +1,8 @@
-import datetime
 import logging
-from datetime import datetime
-
-from urllib.parse import urlparse
+from difflib import diff_bytes, unified_diff
+from wordpress_markdown_blog_loader.api import Wordpress, Post
 from wordpress_markdown_blog_loader.blog import Blog
-from wordpress_markdown_blog_loader.api import Wordpress
+import sys
 
 
 def upsert_post(wp: Wordpress, blog: Blog) -> int:
@@ -13,13 +11,17 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         if not wp.is_host_for(blog.guid):
             raise ValueError(f"blog {blog.guid} is not stored on {wp.endpoint.host}")
 
-        post = wp.get_resource_by_url(blog.guid)
+        post = Post(wp.get_resource_by_url(blog.guid, {"context": "edit"}))
         if not post:
             raise ValueError(
                 "blogs has a guid %s which is not available at %s", blog.guid, wp.host
             )
-        post = wp.update_post(blog.guid, blog.to_wordpress(wp))
-        logging.info("updated blog '%s' %s", blog.title, post.link)
+        wp_post = blog.to_wordpress(wp)
+        if wp_post.get("content") != post.raw_content:
+            logging.info("updated blog '%s' %s", blog.title, post.link)
+            post = wp.update_post(blog.guid, wp_post)
+        else:
+            logging.info("content of '%s' is up-to-date.", blog.title)
     else:
         existing_post = wp.get_post_by_slug(blog.slug)
         if existing_post:
@@ -53,5 +55,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         banner = wp.upload_media(f"{blog.slug}-image", blog.banner)
         if post.featured_media != banner.medium_id:
             wp.update_post(blog.guid, {"featured_media": banner.medium_id})
+
+    logging.info("post available at %s", post.link)
 
     return 0

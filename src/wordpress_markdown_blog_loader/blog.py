@@ -3,7 +3,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
 
 import bs4
@@ -14,7 +14,7 @@ from PIL import Image
 from binx_og_image_generator import generate as generate_og_image
 from binx_og_image_generator.generator import Blog as ImageGeneratorBlog
 from markdown import markdown
-from wordpress_markdown_blog_loader.api import Post
+from wordpress_markdown_blog_loader.api import Post, Medium
 from wordpress_markdown_blog_loader.api import Wordpress, WordpressEndpoint
 
 
@@ -71,7 +71,7 @@ class Blog(object):
 
     @property
     def subtitle(self):
-        return self.blog.metadata.get("subtitle")
+        return self.blog.metadata.get("subtitle", "")
 
     @subtitle.setter
     def subtitle(self, subtitle):
@@ -178,12 +178,11 @@ class Blog(object):
         return Image.open(path) if path and path.exists() else None
 
     def generate_og_banner(self):
-        in_file = self.banner_path
-        out_file = (
-            self.og_banner
-            if self.og_banner
-            else Path(self.dir).joinpath(Path("images/og-banner.jpg"))
-        )
+        in_file = str(self.banner_path)
+
+        if not self.og_image:
+            self.og_image = Path("images/og-banner.jpg")
+        out_file = str(self.og_banner_path)
         logging.info("generating new image in %s", out_file)
         blog = ImageGeneratorBlog(self.title, self.subtitle, self.author)
         generate_og_image(
@@ -202,7 +201,7 @@ class Blog(object):
             return match.group(0)
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
-        return markdown(content, extensions=["fenced_code", "codehilite"])
+        return markdown(content, extensions=["fenced_code"])
 
     @property
     def local_image_references(self) -> set[str]:
@@ -238,15 +237,27 @@ class Blog(object):
             ),
         )
 
+    def download_media(
+        self,
+        url: Union[str, ParseResult],
+        wordpress: Wordpress,
+        name: Optional[str] = None,
+    ) -> Path:
+        url = urlparse(url) if isinstance(url, str) else url
+        name = f"{name}{Path(url.path).suffix}" if name else Path(url.path).name
+        relative_path = Path("images").joinpath(name)
+        path = Path(self.dir).joinpath(relative_path)
+        logging.info("downloading %s", url.geturl())
+        raw = wordpress.get_media(url.geturl())
+        os.makedirs(path.parent, exist_ok=True)
+        with open(path, "wb") as file:
+            file.write(raw)
+        return relative_path
+
     def download_remote_images(self, wp: Wordpress):
         self.downloaded_images = set()
         for url in self.remote_image_references(wp.endpoint):
-            path = Path(self.dir).joinpath("images").joinpath(Path(url.path).name)
-            logging.info("downloading %s as %s", url.geturl(), path)
-            raw = wp.get_media(url.geturl())
-            os.makedirs(path.parent, exist_ok=True)
-            with open(path, "wb") as file:
-                file.write(raw)
+            self.download_media(url, wp)
             self.downloaded_images.add(url.geturl())
 
         def replace_remote_image_references(match: re.Match):
@@ -299,11 +310,13 @@ class Blog(object):
         return result
 
     @staticmethod
-    def from_wordpress(post: Post, base_directory: Path, wp: Wordpress) -> "Blog":
+    def from_wordpress(
+        post: Post, base_directory: Path, wordpress: Wordpress
+    ) -> "Blog":
         """
         convert a Wordpress post to a FrontMatter post
         """
-        categories = {id: name for name, id in wp.categories.items()}
+        categories = {id: name for name, id in wordpress.categories.items()}
 
         blog = Blog()
         blog.dir = (
@@ -314,7 +327,7 @@ class Blog(object):
         )
         blog.path = Path(blog.dir).joinpath("index.md")
         blog.title = post.title
-        blog.author = wp.get_user_by_id(post.author).name
+        blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
         blog.categories = [categories[c] for c in post.categories]
         blog.date = post.date
@@ -322,6 +335,22 @@ class Blog(object):
         blog.status = post.status
         if post.excerpt:
             blog.og_description = bs4.BeautifulSoup(post.excerpt, "lxml").text.strip()
+
+        if post.featured_media:
+            featured_media = Medium(wordpress.get("media", post.featured_media))
+            blog.image = str(
+                blog.download_media(featured_media.url, wordpress, name="banner")
+            )
+
+        og_image = next(
+            filter(lambda u: wordpress.is_host_for((u)), post.og_images), None
+        )
+        if og_image and not (
+            featured_media and og_image.geturl() == featured_media.url
+        ):
+            blog.og_image = str(
+                blog.download_media(og_image.geturl(), wordpress, name="og-banner")
+            )
 
         blog.content = markdownify.markdownify(
             post.content,
@@ -333,6 +362,44 @@ class Blog(object):
             code_language_callback=_code_block_language,
         )
         return blog
+
+    def remove_empty_lines(self):
+        result = []
+        lines = self.content.splitlines(keepends=True)
+        in_code_block = False
+        for i, line in enumerate(lines):
+            if line.startswith("```"):
+                in_code_block = not in_code_block
+
+            if line != "\n":
+                result.append(line)
+                continue
+
+            if in_code_block:
+                if i + 1 >= len(lines) or not lines[i + 1].startswith("```"):
+                    result.append(line)
+                continue
+
+            if i + 1 < len(lines) and (
+                lines[i + 1].startswith("#")
+                or lines[i + 1].startswith("-")
+                or lines[i + 1].startswith("*")
+                or lines[i + 1].startswith("1.")
+            ):
+                result.append(line)
+                continue
+
+            if i + 2 < len(lines) and (
+                lines[i + 2].startswith("--") or lines[i + 2].startswith("==")
+            ):
+                result.append(line)
+                continue
+
+            if i > 0 and (
+                lines[i - 1].startswith("--") or lines[i - 1].startswith("==")
+            ):
+                result.append(line)
+        self.content = "".join(result)
 
     def remove_span_tags(self):
         self.content = remove_span_tags_from_code(self.content)

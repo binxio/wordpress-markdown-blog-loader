@@ -1,11 +1,12 @@
 import configparser
 import logging
+from datetime import datetime
 from io import BytesIO
 from os.path import expanduser
+from pathlib import Path
 from typing import List, Dict, Iterator
-from typing import Optional, Union, Any
+from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
-from datetime import datetime
 
 import pytz
 import requests
@@ -65,11 +66,140 @@ class WordpressEndpoint:
         return result
 
 
+class User(dict):
+    def __init__(self, u):
+        self.update(u)
+
+    @property
+    def name(self):
+        return self.get("name")
+
+    @property
+    def id(self):
+        return self.get("id")
+
+
+class Medium(dict):
+    def __init__(self, properties: dict):
+        self.update(properties)
+
+    @property
+    def medium_id(self):
+        return int(self["id"])
+
+    @property
+    def url(self) -> str:
+        return self.get("guid").get("rendered")
+
+    @property
+    def link(self) -> str:
+        return self["link"]
+
+    @property
+    def slug(self) -> str:
+        return self.get("slug")
+
+    @property
+    def title(self) -> Optional[str]:
+        return self.get("title", {}).get("rendered")
+
+
+class Post(dict):
+    def __init__(self, p):
+        self.update(p)
+
+    @property
+    def slug(self):
+        return self["slug"]
+
+    @property
+    def post_id(self) -> id:
+        return int(self["id"])
+
+    @property
+    def link(self):
+        return self["link"]
+
+    @property
+    def guid(self) -> str:
+        return self["_links"]["self"][0]["href"]
+
+    @property
+    def title(self):
+        r = self["title"]["rendered"]
+        return r.replace("&#8211;", "-")
+
+    @property
+    def featured_media(self) -> Optional[int]:
+        return self.get("featured_media")
+
+    @featured_media.setter
+    def featured_media(self, medium_id: int):
+        self["featured_media"] = medium_id
+
+    @property
+    def content(self) -> Optional[str]:
+        return self.get("content", {}).get("rendered")
+
+    @property
+    def raw_content(self) -> Optional[str]:
+        return self.get("content", {}).get("raw")
+
+    @property
+    def categories(self) -> list[id]:
+        return self.get("categories", [])
+
+    @property
+    def author(self) -> int:
+        return self["author"]
+
+    @property
+    def excerpt(self) -> Optional[str]:
+        return self.get("excerpt", {}).get("rendered")
+
+    @excerpt.setter
+    def exerpt(self, exerpt):
+        self["excerpt"] = exerpt
+
+    @property
+    def date(self) -> datetime:
+        return (
+            pytz.timezone("utc")
+            .localize(datetime.fromisoformat(self.get("date_gmt")))
+            .astimezone()
+        )
+
+    @date.setter
+    def date(self, new_date: datetime):
+        self["date"] = new_date
+        self["date_gmt"] = new_date.astimezone(pytz.timezone("utc"))
+
+    @property
+    def status(self):
+        return self["status"]
+
+    @status.setter
+    def status(self, new_status):
+        self["status"] = new_status
+
+    @property
+    def og_images(self) -> list[ParseResult]:
+        """
+        returns urls to the og:image links
+        """
+        return list(
+            map(
+                lambda u: urlparse(u["url"]),
+                self.get("yoast_head_json", {}).get("og_image", []),
+            )
+        )
+
+
 class Wordpress(object):
     def __init__(self, host: Optional[str] = None):
         self.endpoint = WordpressEndpoint.load(host)
 
-        self._media: Dict[str, dict] = {}
+        self._media: List[Medium] = {}
         self._categories: Dict[str, int] = {}
         self.headers = {
             "accept": "application/json",
@@ -93,7 +223,7 @@ class Wordpress(object):
 
     def get_all(self, resource: str, query: dict = None) -> Iterator[dict]:
         params = query.copy() if query else {}
-        params["per_page"] = "50"
+        params["per_page"] = "100"
         page = 1
         total_pages = 1
         while page <= total_pages:
@@ -151,10 +281,9 @@ class Wordpress(object):
             None,
         )
 
-    @property
-    def media(self) -> List["Medium"]:
+    def media(self) -> List[Medium]:
         if not self._media:
-            self._media = {m["slug"]: Medium(m) for m in self.get_all("media")}
+            self._media = [Medium(m) for m in self.get_all("media")]
         return self._media
 
     @property
@@ -163,7 +292,7 @@ class Wordpress(object):
             self._categories = {c["slug"]: c["id"] for c in self.get_all("categories")}
         return self._categories
 
-    def search_for_image_by_slug(self, slug) -> Optional["Medium"]:
+    def search_for_image_by_slug(self, slug) -> Optional[Medium]:
         response = self.session.get(
             f"{self.url}/media",
             auth=self.auth,
@@ -181,7 +310,7 @@ class Wordpress(object):
         assert response.status_code == 200
         return response.content
 
-    def upload_media(self, slug: str, image: Image) -> "Medium":
+    def upload_media(self, slug: str, image: Image) -> Medium:
         old_content = []
 
         stream = BytesIO()
@@ -239,6 +368,21 @@ class Wordpress(object):
         self._media[slug] = stored_image
         return self._media[slug]
 
+    def find_image_by_link(self, link: Union[str, ParseResult]) -> Optional[Medium]:
+        url = link if isinstance(link, ParseResult) else urlparse(link)
+        stem = Path(url.path).stem
+
+        if not (self.is_host_for(link) and url.path.startswith("/wp-content/uploads/")):
+            return None
+
+        return next(
+            filter(
+                lambda m: url.geturl() == m.url,
+                map(lambda m: Medium(m), self.get_all("media", {"search": stem})),
+            ),
+            None,
+        )
+
     def update_post(self, guid: str, properties: dict):
         response = self.session.patch(
             self.normalize_url(guid),
@@ -261,9 +405,9 @@ class Wordpress(object):
             raise Exception(response.text)
         return Post(response.json())
 
-    def get_resource_by_url(self, url: str) -> Optional[dict]:
+    def get_resource_by_url(self, url: str, params: dict = {}) -> Optional[dict]:
         response = self.session.get(
-            self.normalize_url(url), auth=self.auth, headers=self.headers
+            self.normalize_url(url), auth=self.auth, headers=self.headers, params=params
         )
         if response.status_code == 200:
             return response.json()
@@ -279,112 +423,3 @@ class Wordpress(object):
         global categories
 
         categories = {c["slug"]: c["id"] for c in self.get_all("categories")}
-
-
-class User(dict):
-    def __init__(self, u):
-        self.update(u)
-
-    @property
-    def name(self):
-        return self.get("name")
-
-    @property
-    def id(self):
-        return self.get("id")
-
-
-class Medium(dict):
-    def __init__(self, properties: dict):
-        self.update(properties)
-
-    @property
-    def medium_id(self):
-        return int(self["id"])
-
-    @property
-    def url(self) -> str:
-        return self.get("guid").get("rendered")
-
-    @property
-    def slug(self) -> str:
-        return self.get("slug")
-
-    @property
-    def title(self) -> Optional[str]:
-        return self.get("title", {}).get("rendered")
-
-
-class Post(dict):
-    def __init__(self, p):
-        self.update(p)
-
-    @property
-    def slug(self):
-        return self["slug"]
-
-    @property
-    def post_id(self) -> id:
-        return int(self["id"])
-
-    @property
-    def link(self):
-        return self["link"]
-
-    @property
-    def guid(self) -> str:
-        return self["_links"]["self"][0]["href"]
-
-    @property
-    def title(self):
-        r = self["title"]["rendered"]
-        return r.replace("&#8211;", "-")
-
-    @property
-    def featured_media(self) -> Optional[int]:
-        return self.get("featured_media")
-
-    @featured_media.setter
-    def featured_media(self, medium_id: int):
-        self["featured_media"] = medium_id
-
-    @property
-    def content(self) -> Optional[str]:
-        return self.get("content", {}).get("rendered")
-
-    @property
-    def categories(self) -> list[id]:
-        return self.get("categories", [])
-
-    @property
-    def author(self) -> int:
-        return self["author"]
-
-    @property
-    def excerpt(self) -> Optional[str]:
-        return self.get("excerpt", {}).get("rendered")
-
-    @excerpt.setter
-    def exerpt(self, exerpt):
-        self["excerpt"] = exerpt
-
-    @property
-    def date(self) -> datetime:
-        return (
-            pytz.timezone("utc")
-            .localize(datetime.fromisoformat(self.get("date_gmt")))
-            .astimezone()
-        )
-
-    @date.setter
-    def date(self, new_date: datetime):
-        self["date"] = new_date
-        self["date_gmt"] = new_date.astimezone(pytz.timezone("utc"))
-
-    @property
-    def status(self):
-        return self["status"]
-
-    @status.setter
-    def status(self, new_status):
-        self["status"] = new_status
