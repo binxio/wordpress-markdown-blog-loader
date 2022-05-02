@@ -201,7 +201,7 @@ class Blog(object):
             return match.group(0)
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
-        return markdown(content, extensions=["fenced_code"])
+        return markdown(content, extensions=["fenced_code", "attr_list"])
 
     @property
     def local_image_references(self) -> set[str]:
@@ -385,6 +385,8 @@ class Blog(object):
                 or lines[i + 1].startswith("-")
                 or lines[i + 1].startswith("*")
                 or lines[i + 1].startswith("1.")
+                or lines[i + 1].startswith("~")
+                or lines[i + 1].startswith("`")
             ):
                 result.append(line)
                 continue
