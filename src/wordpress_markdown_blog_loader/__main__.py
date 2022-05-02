@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 import click
-from wordpress_markdown_blog_loader.api import Wordpress
+from wordpress_markdown_blog_loader.api import Wordpress, Post
 from wordpress_markdown_blog_loader.blog import Blog
 from wordpress_markdown_blog_loader.upload import upsert_post
 
@@ -66,17 +66,39 @@ def upload(host: str, blog: str):
     nargs=1,
     help="to download to",
 )
-def download(host: str, directory: str):
+@click.argument(
+    "post-id",
+    type=int,
+    nargs=-1,
+)
+def download(host: str, directory: str, post_id: tuple[str]):
     """
-    all wordpress posts as markdown.
+    all posts as markdown.
 
     Reads all the posts from a Wordpress installation and writes each post as frontmatter
-    document.
+    document. If posts id's are specified, the selected posts are downloaded.
     """
     wordpress = Wordpress(host)
     wordpress.connect()
 
-    for post in wordpress.posts({"context": "edit"}):
+    if post_id:
+        posts = list(
+            map(
+                lambda p: Post(p) if p else None,
+                map(
+                    lambda p: wordpress.get("posts", p, ({"context": "edit"})), post_id
+                ),
+            )
+        )
+
+        for i, post in enumerate(posts):
+            if not post:
+                logging.error("post with id %d was not found", post_id[i])
+                exit(1)
+    else:
+        posts = wordpress.posts({"context": "edit"})
+
+    for post in posts:
         blog = Blog.from_wordpress(post, directory, wordpress)
         blog.download_remote_images(wordpress)
         logging.info("writing %s", blog.path)

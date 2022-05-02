@@ -26,7 +26,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         existing_post = wp.get_post_by_slug(blog.slug)
         if existing_post:
             logging.error(
-                "a post with the same slug already exists, %s", existing_post.link
+                "a post with the same slug already exists, %s", existing_post.guid
             )
             return 1
 

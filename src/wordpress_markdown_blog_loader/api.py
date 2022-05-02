@@ -110,7 +110,7 @@ class Post(dict):
 
     @property
     def slug(self):
-        return self["slug"]
+        return self["slug"] if self["slug"] else self["generated_slug"]
 
     @property
     def post_id(self) -> id:
@@ -416,8 +416,8 @@ class Wordpress(object):
         else:
             raise Exception(response.text)
 
-    def get(self, resource, resource_id) -> Optional[dict]:
-        return self.get_resource_by_url(f"{self.url}/{resource}/{resource_id}")
+    def get(self, resource, resource_id, params: dict = {}) -> Optional[dict]:
+        return self.get_resource_by_url(f"{self.url}/{resource}/{resource_id}", params)
 
     def connect(self):
         global categories
