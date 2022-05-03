@@ -158,7 +158,7 @@ class Post(dict):
         return self.get("excerpt", {}).get("rendered")
 
     @excerpt.setter
-    def exerpt(self, exerpt):
+    def excerpt(self, exerpt):
         self["excerpt"] = exerpt
 
     @property
