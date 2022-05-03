@@ -306,7 +306,9 @@ class Blog(object):
             "categories": [wp.categories[c] for c in self.categories],
         }
         if self.og_description:
-            result["excerpt"] = self.og_description
+            result["meta"] = {
+                "yoast_wpseo_description": self.og_description,
+            }
         return result
 
     @staticmethod
@@ -333,8 +335,8 @@ class Blog(object):
         blog.date = post.date
         blog.slug = post.slug
         blog.status = post.status
-        if post.excerpt:
-            blog.og_description = bs4.BeautifulSoup(post.excerpt, "lxml").text.strip()
+        if post.og_description:
+            blog.og_description = post.og_description
 
         if post.featured_media:
             featured_media = Medium(wordpress.get("media", post.featured_media))

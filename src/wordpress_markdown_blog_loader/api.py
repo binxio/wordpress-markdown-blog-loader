@@ -194,6 +194,10 @@ class Post(dict):
             )
         )
 
+    @property
+    def og_description(self) -> Optional[str]:
+        return self.get("yoast_head_json", {}).get("og_description")
+
 
 class Wordpress(object):
     def __init__(self, host: Optional[str] = None):
