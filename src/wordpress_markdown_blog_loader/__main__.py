@@ -41,9 +41,10 @@ def upload(host: str, blog: str):
     Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
     """
     blog = Blog.load(os.path.join(blog, "index.md"))
-    if blog.banner and not blog.og_banner:
-        logging.info("generating og:image based on %s", blog.banner)
-        blog.generate_og_banner()
+    if blog.image and not blog.og_image:
+        logging.info("generating og:image based on %s", blog.image)
+        blog.generate_og_image()
+        blog.save()
 
     wordpress = Wordpress(host)
     wordpress.connect()
@@ -100,7 +101,7 @@ def download(host: str, directory: str, post_id: tuple[str]):
 
     for post in posts:
         blog = Blog.from_wordpress(post, directory, wordpress)
-        blog.download_remote_images(wordpress)
+        blog.download_remote_images(wordpress, f"{blog.slug}-" if blog.slug else "")
         logging.info("writing %s", blog.path)
         blog.remove_empty_lines()
         blog.save()

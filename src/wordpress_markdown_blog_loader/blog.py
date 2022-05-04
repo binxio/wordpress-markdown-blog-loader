@@ -160,34 +160,32 @@ class Blog(object):
         self.blog.metadata["date"] = new_date
 
     @property
-    def banner_path(self) -> Optional[Path]:
+    def image_path(self) -> Optional[Path]:
         return Path(self.dir).joinpath(self.image) if self.image else None
 
     @property
-    def og_banner_path(self) -> Optional[Path]:
+    def og_image_path(self) -> Optional[Path]:
         return Path(self.dir).joinpath(self.og_image) if self.og_image else None
 
-    @property
-    def banner(self) -> Optional[Image.Image]:
-        path = self.banner_path
-        return Image.open(path) if path and path.exists() else None
-
-    @property
-    def og_banner(self) -> Optional[Image.Image]:
-        path = self.og_banner_path
-        return Image.open(path) if path and path.exists() else None
-
-    def generate_og_banner(self):
-        in_file = str(self.banner_path)
+    def generate_og_image(self):
+        in_file = str(self.image_path)
 
         if not self.og_image:
-            self.og_image = Path("images/og-banner.jpg")
-        out_file = str(self.og_banner_path)
+            self.og_image = "images/og-banner.jpg"
+        out_file = str(self.og_image_path)
         logging.info("generating new image in %s", out_file)
         blog = ImageGeneratorBlog(self.title, self.subtitle, self.author)
         generate_og_image(
             blog, in_file, out_file, resize=True, overwrite=True, gradient_magnitude=0.9
         )
+
+    @property
+    def banner(self) -> Optional["Image"]:
+        return Image.load(self.image_path) if self.image_path else None
+
+    @property
+    def og_banner(self) -> Optional["Image"]:
+        return Image.load(self.og_image_path) if self.og_image_path else None
 
     @property
     def rendered(self):
@@ -241,33 +239,32 @@ class Blog(object):
         self,
         url: Union[str, ParseResult],
         wordpress: Wordpress,
-        name: Optional[str] = None,
-    ) -> Path:
+        path: Path,
+    ):
         url = urlparse(url) if isinstance(url, str) else url
-        name = f"{name}{Path(url.path).suffix}" if name else Path(url.path).name
-        relative_path = Path("images").joinpath(name)
-        path = Path(self.dir).joinpath(relative_path)
-        logging.info("downloading %s", url.geturl())
+        logging.info("downloading %s as %s", url.geturl(), path.name)
         raw = wordpress.get_media(url.geturl())
         os.makedirs(path.parent, exist_ok=True)
         with open(path, "wb") as file:
             file.write(raw)
-        return relative_path
 
-    def download_remote_images(self, wp: Wordpress):
-        self.downloaded_images = set()
+    def download_remote_images(self, wp: Wordpress, slug: str = ""):
+        self.downloaded_images: dict[str, Path] = {}
         for url in self.remote_image_references(wp.endpoint):
-            self.download_media(url, wp)
-            self.downloaded_images.add(url.geturl())
+            name = Path(url.path).name.removeprefix(slug)
+            name = name.removeprefix(slug)
+            path = Path("images").joinpath(name)
+            self.download_media(url, wp, Path(self.dir).joinpath(path))
+            self.downloaded_images[url.geturl()] = path
 
         def replace_remote_image_references(match: re.Match):
-            url = urlparse(match.group("url"))
-            name = Path(url.path).name
-            if url.geturl() in self.downloaded_images:
+            url = match.group("url")
+            path = self.downloaded_images.get(url)
+            if path:
                 caption = ""
                 if match.group("caption"):
                     caption = match.group("caption")
-                return f"![{match.group('alt_text')}](./images/{name}{caption})"
+                return f"![{match.group('alt_text')}]({path}{caption})"
             return match.group(0)
 
         self.content = self.markdown_image_pattern.sub(
@@ -282,13 +279,8 @@ class Blog(object):
                 logging.warning("%s does not exist", path)
                 continue
 
-            image = Image.open(path)
-            slug = (
-                self.slug
-                + "-"
-                + re.sub(r"[/\.\\]+", "-", Path(filename).stem).strip("-")
-            )
-            self.uploaded_images[filename] = wp.upload_media(slug, image)
+            slug = self.slug + "-" + re.sub(r"[/\.\\]+", "-", path.stem.strip("-"))
+            self.uploaded_images[filename] = wp.upload_media(slug, path)
 
     def to_wordpress(self, wp: Wordpress) -> dict:
         author = wp.get_unique_user_by_name(self.author)
@@ -328,6 +320,10 @@ class Blog(object):
             .joinpath(post.slug)
         )
         blog.path = Path(blog.dir).joinpath("index.md")
+
+        if blog.path.exists():
+            blog = blog.load(blog.path)
+
         blog.title = post.title
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
@@ -339,10 +335,12 @@ class Blog(object):
             blog.og_description = post.og_description
 
         if post.featured_media:
-            featured_media = Medium(wordpress.get("media", post.featured_media))
-            blog.image = str(
-                blog.download_media(featured_media.url, wordpress, name="banner")
-            )
+            featured_media: Medium = Medium(wordpress.get("media", post.featured_media))
+            url = urlparse(featured_media.url)
+
+            if not blog.image:
+                blog.image = os.path.join("images", "banner" + Path(url.path).suffix)
+            blog.download_media(url.geturl(), wordpress, path=blog.image_path)
 
         og_image = next(
             filter(lambda u: wordpress.is_host_for((u)), post.og_images), None
@@ -350,9 +348,11 @@ class Blog(object):
         if og_image and not (
             featured_media and og_image.geturl() == featured_media.url
         ):
-            blog.og_image = str(
-                blog.download_media(og_image.geturl(), wordpress, name="og-banner")
-            )
+            if not blog.og_image:
+                blog.og_image = os.path.join(
+                    "images", "og-banner" + Path(url.path).suffix
+                )
+            blog.download_media(og_image.geturl(), wordpress, blog.og_image_path)
 
         blog.content = markdownify.markdownify(
             post.content,

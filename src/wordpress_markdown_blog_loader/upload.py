@@ -35,24 +35,24 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         blog.save()
         logging.info("uploaded blog '%s' as post %s", blog.title, post.link)
 
-    if blog.og_banner:
-        og_banner = wp.upload_media(f"{blog.slug}-og-image", blog.og_banner)
-        post_og_banners = post.get("yoast_head_json", {}).get("og_image", [])
+    if blog.og_image:
+        og_image = wp.upload_media(f"{blog.slug}-og-banner", blog.og_image_path)
+        post_og_images = post.get("yoast_head_json", {}).get("og_image", [])
         if not next(
-            filter(lambda b: b.get("url") == og_banner.url, post_og_banners), None
+            filter(lambda b: b.get("url") == og_image.url, post_og_images), None
         ):
-            logging.info("updating opengraph image to %s", og_banner.url)
+            logging.info("updating opengraph image to %s", og_image.url)
             updated_post = wp.update_post(
                 blog.guid,
                 {
                     "meta": {
-                        "yoast_wpseo_opengraph-image": og_banner.url,
+                        "yoast_wpseo_opengraph-image": og_image.url,
                     }
                 },
             )
 
-    if blog.banner:
-        banner = wp.upload_media(f"{blog.slug}-image", blog.banner)
+    if blog.image:
+        banner = wp.upload_media(f"{blog.slug}-banner", blog.image_path)
         if post.featured_media != banner.medium_id:
             wp.update_post(blog.guid, {"featured_media": banner.medium_id})
 

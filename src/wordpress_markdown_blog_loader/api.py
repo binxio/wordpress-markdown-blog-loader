@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Dict, Iterator
 from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
+import mimetypes
 
 import pytz
 import requests
@@ -110,7 +111,7 @@ class Post(dict):
 
     @property
     def slug(self):
-        return self["slug"] if self["slug"] else self["generated_slug"]
+        return self["slug"] if self["slug"] else self.get("generated_slug")
 
     @property
     def post_id(self) -> id:
@@ -314,12 +315,11 @@ class Wordpress(object):
         assert response.status_code == 200
         return response.content
 
-    def upload_media(self, slug: str, image: Image) -> Medium:
+    def upload_media(self, slug: str, path: Path) -> Medium:
         old_content = []
 
-        stream = BytesIO()
-        image.save(stream, format=image.format)
-        content = stream.getvalue()
+        with open(path, "rb") as file:
+            content = file.read()
 
         stored_image = self.search_for_image_by_slug(slug)
         if stored_image:
@@ -343,12 +343,12 @@ class Wordpress(object):
                 if delete_response.status_code not in [200, 201, 202]:
                     raise Exception(response.text)
 
-            filename = f"{slug}.{image.format.lower()}"
+            filename = f"{slug}{path.suffix}"
             print(f"INFO: uploading image as {filename}")
 
             headers = self.headers | {
                 "Content-Disposition": f'attachment; filename="{filename}"',
-                "Content-Type": Image.MIME[image.format],
+                "Content-Type": mimetypes.guess_type(path)[0],
             }
 
             response = self.session.post(
