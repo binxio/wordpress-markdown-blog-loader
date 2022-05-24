@@ -1,5 +1,5 @@
 ---
-name: release
+name: push-to-registry
 
 "on":
   push:

@@ -57,11 +57,12 @@ def command(title, subtitle, author, image):
         hour=0, minute=0, second=0, microsecond=0
     )
     if image:
-        save_og_image(image, directory.joinpath("images/banner.jpg"))
+        image_path = save_og_image(image, directory.joinpath("images/banner"))
+        blog.image = image_path.relative_to(directory).as_posix()
     blog.save()
 
 
-def save_og_image(image: Image, path: Path):
+def save_og_image(image: Image, path: Path) -> Path:
     """
     save the image to be the perfect og image size: 1200x630px
     """
@@ -86,5 +87,8 @@ def save_og_image(image: Image, path: Path):
         image = new_image
 
     path.parent.mkdir(exist_ok=True, parents=True)
+
+    path = path.with_suffix(".png" if image.mode == "RGBA" else ".jpg")
     with open(path, "wb") as file:
         image.save(file, **image.info)
+    return path
