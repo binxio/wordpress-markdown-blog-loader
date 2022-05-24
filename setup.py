@@ -16,6 +16,7 @@ dependencies = [
     "bs4",
     "html5lib",
     "lxml",
+    "python-slugify",
 ]
 
 this_directory = path.abspath(path.dirname(__file__))

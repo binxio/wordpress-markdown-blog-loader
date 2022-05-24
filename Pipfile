@@ -7,7 +7,7 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
-wp-md-blog-loader = {editable = true, path = "."}
+wordpress-markdown-blog-loader = {editable = true, path = "."}
 
 [requires]
 python_version = "3.9"

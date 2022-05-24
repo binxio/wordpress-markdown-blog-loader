@@ -1,5 +1,9 @@
 import logging
+import os
 from difflib import diff_bytes, unified_diff
+
+import click
+
 from wordpress_markdown_blog_loader.api import Wordpress, Post
 from wordpress_markdown_blog_loader.blog import Blog
 import sys
@@ -59,3 +63,32 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
     logging.info("post available at %s", post.link)
 
     return 0
+
+
+@click.command(name="upload")
+@click.option(
+    "--host", type=str, required=True, nargs=1, help="wordpress host to upload to"
+)
+@click.argument(
+    "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
+)
+def command(host: str, blog: str):
+    """
+    the wordpress blog post to Wordpress.
+
+    Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
+    """
+    blog = Blog.load(os.path.join(blog, "index.md"))
+    if blog.image and not blog.og_image:
+        logging.info("generating og:image based on %s", blog.image)
+        blog.generate_og_image()
+        blog.save()
+
+    wordpress = Wordpress(host)
+    wordpress.connect()
+
+    try:
+        upsert_post(wordpress, blog)
+    except ValueError as exception:
+        logging.error(exception)
+        sys.exit(1)
