@@ -26,7 +26,7 @@ from wordpress_markdown_blog_loader.blog import Blog
 )
 def command(host: str, directory: str, post_id: tuple[str]):
     """
-    all posts as markdown.
+    WordPress posts as markdown.
 
     Reads all the posts from a Wordpress installation and writes each post as frontmatter
     document. If posts id's are specified, the selected posts are downloaded.

@@ -74,7 +74,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 )
 def command(host: str, blog: str):
     """
-    the wordpress blog post to Wordpress.
+    the blog to Wordpress
 
     Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
     """

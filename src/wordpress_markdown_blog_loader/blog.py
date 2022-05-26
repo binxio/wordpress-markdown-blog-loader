@@ -176,7 +176,7 @@ class Blog(object):
         logging.info("generating new image in %s", out_file)
         blog = ImageGeneratorBlog(self.title, self.subtitle, self.author)
         generate_og_image(
-            blog, in_file, out_file, resize=True, overwrite=True, gradient_magnitude=0.9
+            blog, in_file, out_file, overwrite=True, gradient_magnitude=0.9
         )
 
     @property

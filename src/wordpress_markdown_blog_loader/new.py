@@ -1,3 +1,4 @@
+import os
 import click
 from urllib.request import urlopen
 from urllib.parse import urlparse
@@ -37,7 +38,10 @@ class ImageType(click.ParamType):
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
 def command(title, subtitle, author, image):
     """
-    creates a select blog file
+    frontmatter blog
+
+    the index.md will be written in a subdirectory with the name of the slug for the blog.
+    The slug is created from the title. The image will be resized and cropped to 1200x630.
     """
     slug = slugify(title)
 
@@ -53,6 +57,7 @@ def command(title, subtitle, author, image):
     blog.subtitle = subtitle
     blog.status = "draft"
     blog.slug = slug
+    blog.author = author
     blog.og_description = "TODO: add short SEO description here"
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
@@ -93,3 +98,22 @@ def save_og_image(image: Image, path: Path) -> Path:
     with open(path, "wb") as file:
         image.save(file, **image.info)
     return path
+
+
+@click.command(name="new-og-image")
+@click.argument(
+    "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
+)
+def og_image_command(blog):
+    """
+    for the blog
+    """
+    path = Path(blog).joinpath("index.md")
+    if not path.exists():
+        raise click.UsageError(f"{path} not found")
+
+    blog = Blog.load(path.as_posix())
+    if not blog.image:
+        raise click.UsageError(f"{blog} does not have a banner image yet")
+    blog.generate_og_image()
+    blog.save()

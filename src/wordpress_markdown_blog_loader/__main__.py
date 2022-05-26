@@ -24,7 +24,9 @@ def posts():
 posts.add_command(upload.command)
 posts.add_command(download.command)
 posts.add_command(new.command)
+posts.add_command(new.og_image_command)
 
 
 if __name__ == "__main__":
     main()
+pi
