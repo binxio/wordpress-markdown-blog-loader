@@ -13,6 +13,13 @@ import pytz
 import requests
 from PIL import Image
 
+def get_default_host() -> Optional[str]:
+    """
+    returns the default api host from ~/.wordpress.ini
+    """
+    config = configparser.ConfigParser()
+    config.read(expanduser("~/.wordpress.ini"))
+    return config.defaults().get("host")
 
 class WordpressEndpoint:
     def __init__(self, **kwargs):
