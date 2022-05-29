@@ -303,7 +303,8 @@ class Blog(object):
                 self.excerpt, extensions=["fenced_code", "attr_list"]
             )
 
-        result["meta"] = {"yoast_wpseo_metadesc": self.og_description}
+        metadesc = self.og_description if self.og_description else self.excerpt
+        result["meta"] = {"yoast_wpseo_metadesc": metadesc }
         return result
 
     @staticmethod
@@ -366,7 +367,7 @@ class Blog(object):
                     "markdown.extensions.extra",
                 ],
                 code_language_callback=_code_block_language,
-            )
+            ).strip()
         blog.content = markdownify.markdownify(
             post.content,
             STRIP=True,
@@ -376,6 +377,7 @@ class Blog(object):
             ],
             code_language_callback=_code_block_language,
         )
+
         return blog
 
     def remove_empty_lines(self):
