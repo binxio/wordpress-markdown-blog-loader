@@ -21,11 +21,8 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
                 "blogs has a guid %s which is not available at %s", blog.guid, wp.host
             )
         wp_post = blog.to_wordpress(wp)
-        if wp_post.get("content") != post.raw_content:
-            logging.info("updated blog '%s' %s", blog.title, post.link)
-            post = wp.update_post(blog.guid, wp_post)
-        else:
-            logging.info("content of '%s' is up-to-date.", blog.title)
+        logging.info("updating blog '%s' %s", blog.title, post.link)
+        post = wp.update_post(blog.guid, wp_post)
     else:
         existing_post = wp.get_post_by_slug(blog.slug)
         if existing_post:
