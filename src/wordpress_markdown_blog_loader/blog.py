@@ -118,7 +118,7 @@ class Blog(object):
 
     @property
     def og_description(self):
-        return self.og.get("description")
+        return self.og.get("description", "")
 
     @og_description.setter
     def og_description(self, og_description):
@@ -297,10 +297,13 @@ class Blog(object):
             "author": author.id,
             "categories": [wp.categories[c] for c in self.categories],
         }
-        if self.og_description:
-            result["meta"] = {
-                "yoast_wpseo_description": self.og_description,
-            }
+
+        if self.excerpt:
+            result["excerpt"] = markdown(
+                self.excerpt, extensions=["fenced_code", "attr_list"]
+            )
+
+        result["meta"] = {"yoast_wpseo_metadesc": self.og_description}
         return result
 
     @staticmethod
@@ -354,6 +357,16 @@ class Blog(object):
                 )
             blog.download_media(og_image.geturl(), wordpress, blog.og_image_path)
 
+        if post.excerpt:
+            blog.excerpt = markdownify.markdownify(
+                post.excerpt,
+                STRIP=True,
+                MARKDOWN_EXTENSIONS=[
+                    "markdown.extensions.fenced_code",
+                    "markdown.extensions.extra",
+                ],
+                code_language_callback=_code_block_language,
+            )
         blog.content = markdownify.markdownify(
             post.content,
             STRIP=True,

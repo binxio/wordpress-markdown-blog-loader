@@ -29,4 +29,3 @@ posts.add_command(new.og_image_command)
 
 if __name__ == "__main__":
     main()
-
