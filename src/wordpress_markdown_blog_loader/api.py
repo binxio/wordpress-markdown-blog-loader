@@ -208,6 +208,14 @@ class Post(dict):
     def og_description(self) -> Optional[str]:
         return self.get("yoast_head_json", {}).get("og_description")
 
+    @property
+    def permalink_template(self) -> Optional[str]:
+        return self.get("permalink_template")
+
+    @permalink_template.setter
+    def permalink_template(self, template: str):
+        self["permalink_template"] = template
+
 
 class Wordpress(object):
     def __init__(self, host: Optional[str] = None):

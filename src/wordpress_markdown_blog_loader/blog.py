@@ -54,6 +54,14 @@ class Blog(object):
         self.blog.metadata["slug"] = slug
 
     @property
+    def permalink_template(self):
+        return self.blog.metadata.get("permalink_template")
+
+    @permalink_template.setter
+    def permalink_template(self, permalink_template):
+        self.blog.metadata["permalink_template"] = permalink_template
+
+    @property
     def author(self):
         return self.blog.metadata.get("author")
 
@@ -298,13 +306,16 @@ class Blog(object):
             "categories": [wp.categories[c] for c in self.categories],
         }
 
+        if self.permalink_template:
+            result["permalink_template"] = self.permalink_template
+
         if self.excerpt:
             result["excerpt"] = markdown(
                 self.excerpt, extensions=["fenced_code", "attr_list"]
             )
 
         metadesc = self.og_description if self.og_description else self.excerpt
-        result["meta"] = {"yoast_wpseo_metadesc": metadesc }
+        result["meta"] = {"yoast_wpseo_metadesc": metadesc}
         return result
 
     @staticmethod
@@ -335,6 +346,12 @@ class Blog(object):
         blog.date = post.date
         blog.slug = post.slug
         blog.status = post.status
+
+        if post.permalink_template and not blog.permalink_template:
+            # keeping the permalink template registered in the blog metadata.
+            # Wordpress does not return the template that was set.
+            blog.permalink_template = post.permalink_template
+
         if post.og_description:
             blog.og_description = post.og_description
 
