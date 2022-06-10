@@ -58,7 +58,6 @@ def command(title, subtitle, author, image):
     blog.status = "draft"
     blog.slug = slug
     blog.author = author
-    blog.og_description = "TODO: add short SEO description here"
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
