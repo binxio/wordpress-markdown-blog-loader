@@ -99,20 +99,26 @@ def save_og_image(image: Image, path: Path) -> Path:
     return path
 
 
-@click.command(name="new-og-image")
+@click.command(name="update-banner")
 @click.argument(
     "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
 )
-def og_image_command(blog):
+@click.argument(
+    "image", type=ImageType(), required=True
+)
+def update_banner_command(blog, image):
     """
-    for the blog
+    of the blog.
+
+    reads the image, crops it to the 1200x630 dimensions and updates the blog's banner property.
+    Regenerates and updates the og-banner too.
     """
     path = Path(blog).joinpath("index.md")
     if not path.exists():
         raise click.UsageError(f"{path} not found")
 
     blog = Blog.load(path.as_posix())
-    if not blog.image:
-        raise click.UsageError(f"{blog} does not have a banner image yet")
+    image_path = save_og_image(image, blog.dir.joinpath("images/banner"))
+    blog.image = image_path.relative_to(blog.dir).as_posix()
     blog.generate_og_image()
     blog.save()
