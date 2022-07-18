@@ -328,7 +328,7 @@ class Wordpress(object):
             return None
 
     def get_media(self, url: str) -> bytes:
-        response = self.session.get(url, stream=True, auth=self.auth)
+        response = self.session.get(url, headers=self.headers, stream=True, auth=self.auth)
         assert response.status_code == 200
         return response.content
 
@@ -340,7 +340,7 @@ class Wordpress(object):
 
         stored_image = self.search_for_image_by_slug(slug)
         if stored_image:
-            response = self.session.get(stored_image.url, stream=True, auth=self.auth)
+            response = self.session.get(stored_image.url, headers=self.headers, stream=True, auth=self.auth)
             assert response.status_code == 200
             old_content = response.content
 
