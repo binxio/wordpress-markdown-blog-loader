@@ -207,7 +207,7 @@ class Blog(object):
             return match.group(0)
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
-        return markdown(content, extensions=["fenced_code", "attr_list"])
+        return markdown(content, extensions=["fenced_code", "attr_list", "tables"])
 
     @property
     def local_image_references(self) -> set[str]:
@@ -391,6 +391,7 @@ class Blog(object):
             MARKDOWN_EXTENSIONS=[
                 "markdown.extensions.fenced_code",
                 "markdown.extensions.extra",
+                "markdown.extensions.tables",
             ],
             code_language_callback=_code_block_language,
         )
