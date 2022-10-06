@@ -8,7 +8,7 @@ in your favorite editor and keeps all your blogs in git.
 - generates an opengraph image including the title, subtitle and author in Binx.io style
 
 ## caveats
-- changing the slug leaves may orphan blog and images
+- changing the slug may orphan images
 - removing images from the markdown, will leave dangling images in Wordpress
 
 ## required Wordpress Plugins
