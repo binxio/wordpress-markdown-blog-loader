@@ -392,6 +392,7 @@ class Blog(object):
                 "markdown.extensions.fenced_code",
                 "markdown.extensions.extra",
                 "markdown.extensions.tables",
+                "markdown.extensions.footnotes",
             ],
             code_language_callback=_code_block_language,
         )
