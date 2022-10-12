@@ -370,6 +370,8 @@ class Blog(object):
             if not blog.image:
                 blog.image = os.path.join("images", "banner" + Path(url.path).suffix)
             blog.download_media(url.geturl(), wordpress, path=blog.image_path)
+        else:
+            featured_media: Medium = None
 
         og_image = next(
             filter(lambda u: wordpress.is_host_for((u)), post.og_images), None
@@ -379,7 +381,7 @@ class Blog(object):
         ):
             if not blog.og_image:
                 blog.og_image = os.path.join(
-                    "images", "og-banner" + Path(url.path).suffix
+                    "images", "og-banner" + Path(og_image.path).suffix
                 )
             blog.download_media(og_image.geturl(), wordpress, blog.og_image_path)
 
