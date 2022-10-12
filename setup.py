@@ -7,6 +7,7 @@ from setuptools import find_packages, setup
 dependencies = [
     "requests",
     "markdown",
+    "markdown-katex",
     "python-frontmatter",
     "click",
     "pytz",

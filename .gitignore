@@ -107,3 +107,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# node shizzle
+node_modules
+package.json
+package-lock.json

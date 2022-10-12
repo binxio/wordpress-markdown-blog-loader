@@ -207,7 +207,15 @@ class Blog(object):
             return match.group(0)
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
-        return markdown(content, extensions=["fenced_code", "attr_list", "tables"])
+        return markdown(content,
+                        extensions=["fenced_code", "attr_list", "tables", "footnotes", "markdown_katex"],
+                        extension_configs={
+                            'markdown_katex': {
+                                'no_inline_svg': False,
+                                'insert_fonts_css': False,
+                            },
+                        }
+        )
 
     @property
     def local_image_references(self) -> set[str]:
@@ -393,6 +401,7 @@ class Blog(object):
                 "markdown.extensions.extra",
                 "markdown.extensions.tables",
                 "markdown.extensions.footnotes",
+                "markdown.extensions.markdown_katex",
             ],
             code_language_callback=_code_block_language,
         )
