@@ -13,7 +13,7 @@ jobs:
       -
         name: Get tag
         id: repository
-        run: echo "${GITHUB_REF}" | awk -F/ '{printf("::set-output name=tag::%s\n", $NF)}'
+        run: echo "${GITHUB_REF}" | awk -F/ '{printf("tag=%s\n", $NF)}' >> $GITHUB_ENV
       -
         name: Checkout
         uses: actions/checkout@v2
@@ -37,4 +37,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/binxio/wordpress-markdown-blog-loader:${{ steps.repository.outputs.tag }}
+          tags: ghcr.io/binxio/wordpress-markdown-blog-loader:${{ env.tag }}
