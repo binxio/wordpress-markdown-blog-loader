@@ -38,7 +38,7 @@ class ImageType(click.ParamType):
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
 def command(title, subtitle, author, image):
     """
-    frontmatter blog
+    a new frontmatter blog
 
     the index.md will be written in a subdirectory with the name of the slug for the blog.
     The slug is created from the title. The image will be resized and cropped to 1200x630.
