@@ -1,6 +1,8 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '${_IMAGE}', '.']
+    args: ['buildx', 'create', '--name', 'mybuilder', '--use']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['buildx', 'build', '--platform', 'linux/arm64,linux/amd64', '-t', '${_IMAGE}', '.']
 
 images: ['${_IMAGE}']
 
