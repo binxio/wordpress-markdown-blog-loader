@@ -1,8 +1,10 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
+    args: ['run', '--rm', '--privileged', 'multiarch/qemu-user-static']
+  - name: 'gcr.io/cloud-builders/docker'
     args: ['buildx', 'create', '--name', 'mybuilder', '--use']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['buildx', 'build', '--platform', 'linux/arm64,linux/amd64', '--output', 'type=image,push=true', '-t', '${_IMAGE}', '.']
+    args: ['buildx', 'build', '.', '-t', '${_IMAGE}', '--platform', 'linux/arm64,linux/amd64', '--output', 'type=image,push=true']
 
 images: ['${_IMAGE}']
 
