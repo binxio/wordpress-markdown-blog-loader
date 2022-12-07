@@ -303,7 +303,7 @@ class Blog(object):
             "format": "standard",
             "status": self.status,
             "author": author.id,
-            "categories": [wp.categories[c] for c in self.categories],
+            "categories": [wp.get_category_id_by_name(c) for c in self.categories],
         }
 
         if self.permalink_template:

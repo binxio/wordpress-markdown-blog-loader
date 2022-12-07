@@ -103,9 +103,7 @@ def save_og_image(image: Image, path: Path) -> Path:
 @click.argument(
     "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
 )
-@click.argument(
-    "image", type=ImageType(), required=True
-)
+@click.argument("image", type=ImageType(), required=True)
 def update_banner_command(blog, image):
     """
     of the blog.

@@ -328,7 +328,9 @@ class Wordpress(object):
             return None
 
     def get_media(self, url: str) -> bytes:
-        response = self.session.get(url, headers=self.headers, stream=True, auth=self.auth)
+        response = self.session.get(
+            url, headers=self.headers, stream=True, auth=self.auth
+        )
         assert response.status_code == 200
         return response.content
 
@@ -340,7 +342,9 @@ class Wordpress(object):
 
         stored_image = self.search_for_image_by_slug(slug)
         if stored_image:
-            response = self.session.get(stored_image.url, headers=self.headers, stream=True, auth=self.auth)
+            response = self.session.get(
+                stored_image.url, headers=self.headers, stream=True, auth=self.auth
+            )
             assert response.status_code == 200
             old_content = response.content
 
@@ -444,3 +448,13 @@ class Wordpress(object):
         global categories
 
         categories = {c["slug"]: c["id"] for c in self.get_all("categories")}
+
+    def get_category_id_by_name(self, category: str) -> str:
+        if category in self.categories:
+            return self.categories[category]
+
+        raise ValueError(
+            "invalid category {} try one of\n {}".format(
+                category, ",\n ".join(self.categories.keys())
+            )
+        )
