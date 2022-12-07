@@ -1,11 +1,13 @@
-FROM python:3.9-alpine
+FROM python:3.9-slim
 
 WORKDIR /src
 ADD     . /src
-RUN     apk add --no-cache libxslt-dev libxml2-dev build-base freetype-dev libffi-dev python3-dev jpeg-dev zlib-dev && \
+RUN     apt-get update && \
+        apt-get install -y libxslt1-dev libxml2-dev gcc libfreetype6-dev libffi-dev python3-dev libjpeg-dev  zlib1g-dev && \
         python setup.py install && \
-        apk del libxslt-dev libxml2-dev build-base freetype-dev libffi-dev python3-dev jpeg-dev zlib-dev && \
-        apk add --no-cache libxslt libxml2 freetype libffi jpeg zlib
+        apt-get remove -y libxslt1-dev libxml2-dev gcc libfreetype6-dev libffi-dev python3-dev libjpeg-dev  zlib1g-dev && \
+        apt-get install -y libxslt1.1 libxml2 libfreetype6 libffi7 libjpeg62-turbo zlib1g && \
+        apt-get -y autoclean
 
 WORKDIR    /workspace
 ENTRYPOINT ["/usr/local/bin/wp-md"]

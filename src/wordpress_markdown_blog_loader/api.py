@@ -454,7 +454,7 @@ class Wordpress(object):
             return self.categories[category]
 
         raise ValueError(
-            "invalid category {} try one of\n {}".format(
+            "invalid category '{}' try one of\n {}".format(
                 category, ",\n ".join(self.categories.keys())
             )
         )
