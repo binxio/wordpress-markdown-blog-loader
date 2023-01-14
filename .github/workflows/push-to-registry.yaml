@@ -49,4 +49,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ env.tag }},ghcr.io/${{ github.repository }}:${{ env.GITHUB_REF_NAME }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.tag }},ghcr.io/${{ github.repository }}:${GITHUB_REF_NAME}
