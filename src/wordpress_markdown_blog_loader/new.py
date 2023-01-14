@@ -65,7 +65,7 @@ def command(title, subtitle, author, image):
         image_path = save_og_image(image, directory.joinpath("images/banner"))
         blog.image = image_path.relative_to(directory).as_posix()
     blog.save()
-    logging.info("start editing index.md in {blog.directory}")
+    logging.info("start editing index.md in %s", blog.directory)
 
 
 def save_og_image(image: Image, path: Path) -> Path:
