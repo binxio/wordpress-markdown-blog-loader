@@ -1,35 +1,47 @@
 ---
-name: push-to-registry
+name: Build and publish the container image
 
 "on":
   push:
-    branches:
+    tags:
       - '*'
+    branches:
+      - 'main'
 
 jobs:
-  docker:
+  build-and-push-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       -
         name: Get tag
         id: repository
-        run: echo "${GITHUB_REF}" | awk -F/ '{printf("tag=%s\n", $NF)}' >> $GITHUB_ENV
-      -
-        name: Checkout
-        uses: actions/checkout@v2
+        run: echo "tag=$(git describe --tags HEAD)" > $GITHUB_ENV
+
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
       -
-        name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        name: Log in to the Container registry
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -37,4 +49,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/binxio/wordpress-markdown-blog-loader:${{ env.tag }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.tag }}
