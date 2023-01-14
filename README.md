@@ -64,6 +64,13 @@ INFO: start editing index.md in ./how-to-create-a-wordpress-blog-without-touchin
 
 A skaffold frontmatter blog is created, and you can start writing in the index.md.
 
+## adding images
+To add an image to your blog, add the images in the ./images subdirectory and add a relative reference in markdown. For instance:
+
+```markdown
+![](./images/architecture.png)
+```
+
 ## uploading a blog
 To upload a blog, type:
 
