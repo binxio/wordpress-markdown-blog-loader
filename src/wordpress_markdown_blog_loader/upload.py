@@ -66,18 +66,27 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 @click.option(
     "--host", type=str, required=True, nargs=1, help="wordpress host to upload to"
 )
+@click.option(
+    "--regenerate-og-image", is_flag=True, default=False, help="regenerates the og image for the targeted host"
+)
 @click.argument(
     "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
 )
-def command(host: str, blog: str):
+def command(host: str, blog: str, regenerate_og_image: bool):
     """
     the blog to Wordpress
 
     Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
     """
     blog = Blog.load(os.path.join(blog, "index.md"))
-    if blog.image and not blog.og_image:
+    if blog.image and (regenerate_og_image or not blog.og_image):
         logging.info("generating og:image based on %s", blog.image)
+        if not blog.brand:
+            logging.info("blog brand set to %s", host)
+        elif blog.brand != host:
+            logging.warning("change brand from %s to %s", blog.brand, host)
+
+        blog.brand = host
         blog.generate_og_image()
         blog.save()
 

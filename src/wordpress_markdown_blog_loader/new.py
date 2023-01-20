@@ -9,6 +9,7 @@ from wordpress_markdown_blog_loader.blog import Blog
 from datetime import datetime, timedelta
 import logging
 from io import BytesIO
+from pathlib import Path
 
 
 class ImageType(click.ParamType):
@@ -18,7 +19,7 @@ class ImageType(click.ParamType):
         try:
             url = urlparse(value)
             if url.netloc == "":
-                url = urlparse(f"file://{value}")
+                url = urlparse(Path(value).absolute().as_uri())
             response = urlopen(url.geturl())
             content_type = response.headers.get("Content-Type")
             if not content_type.startswith("image/"):
@@ -36,7 +37,14 @@ class ImageType(click.ParamType):
 @click.option("--subtitle", required=True, help="of the blog")
 @click.option("--author", required=True, help="of the blog")
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
-def command(title, subtitle, author, image):
+@click.option(
+    "--brand",
+    type=click.Choice(["xebia.com", "binx.io"]),
+    required=True,
+    default="xebia.com",
+    help="of the banner",
+)
+def command(title, subtitle, author, image, brand):
     """
     a new frontmatter blog
 
@@ -58,6 +66,7 @@ def command(title, subtitle, author, image):
     blog.status = "draft"
     blog.slug = slug
     blog.author = author
+    blog.brand = brand
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
@@ -65,7 +74,7 @@ def command(title, subtitle, author, image):
         image_path = save_og_image(image, directory.joinpath("images/banner"))
         blog.image = image_path.relative_to(directory).as_posix()
     blog.save()
-    logging.info("start editing index.md in %s", blog.directory)
+    logging.info("start editing index.md in %s", blog.dir)
 
 
 def save_og_image(image: Image, path: Path) -> Path:
@@ -105,7 +114,12 @@ def save_og_image(image: Image, path: Path) -> Path:
     "blog", type=click.Path(exists=True, file_okay=False, readable=True), required=True
 )
 @click.argument("image", type=ImageType(), required=True)
-def update_banner_command(blog, image):
+@click.option(
+    "--brand",
+    type=click.Choice(["xebia.com", "binx.io"]),
+    help="of the banner",
+)
+def update_banner_command(blog, image, brand):
     """
     of the blog.
 

@@ -117,6 +117,14 @@ class Blog(object):
     def og_image(self):
         return self.og.get("image")
 
+    @property
+    def brand(self):
+        return self.blog.metadata.get("brand")
+
+    @brand.setter
+    def brand(self, brand):
+        self.blog.metadata["brand"] = brand
+
     @og_image.setter
     def og_image(self, og_image):
         if "og" in self.blog.metadata:
@@ -184,7 +192,8 @@ class Blog(object):
         logging.info("generating new image in %s", out_file)
         blog = ImageGeneratorBlog(self.title, self.subtitle, self.author)
         generate_og_image(
-            blog, in_file, out_file, overwrite=True, gradient_magnitude=0.9
+            blog, in_file, out_file, overwrite=True, gradient_magnitude=0.9,
+            brand=self.brand
         )
 
     @property
@@ -346,6 +355,7 @@ class Blog(object):
         blog.date = post.date
         blog.slug = post.slug
         blog.status = post.status
+        blog.brand = wordpress.endpoint.host
 
         if post.permalink_template and not blog.permalink_template:
             # keeping the permalink template registered in the blog metadata.
