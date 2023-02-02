@@ -189,6 +189,15 @@ class Blog(object):
     def image_path(self) -> Optional[Path]:
         return Path(self.dir).joinpath(self.image) if self.image else None
 
+
+    @property
+    def email(self) -> Optional[str]:
+        return self.blog.metadata.get("email")
+
+    @email.setter
+    def email(self, new_email):
+        self.blog.metadata["email"] = new_email
+
     @property
     def og_image_path(self) -> Optional[Path]:
         return Path(self.dir).joinpath(self.og_image) if self.og_image else None
@@ -200,7 +209,7 @@ class Blog(object):
             self.og_image = "images/og-banner.jpg"
         out_file = str(self.og_image_path)
         logging.info("generating new image in %s", out_file)
-        blog = ImageGeneratorBlog(self.title, self.subtitle, self.author)
+        blog = ImageGeneratorBlog(self.title, self.subtitle, self.author, self.email)
         generate_og_image(
             blog, in_file, out_file, overwrite=True, gradient_magnitude=0.9,
             brand=self.brand
