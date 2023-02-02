@@ -57,6 +57,16 @@ class Blog(object):
     def permalink_template(self):
         return self.blog.metadata.get("permalink_template")
 
+    @property
+    def canonical(self):
+        return self.blog.metadata.get("canonical")
+    @canonical.setter
+    def canonical(self, value):
+        if value:
+            self.blog.metadata["canonical"] = value
+        else:
+            self.blog.metadata.pop("canonical", "")
+
     @permalink_template.setter
     def permalink_template(self, permalink_template):
         self.blog.metadata["permalink_template"] = permalink_template
@@ -325,6 +335,9 @@ class Blog(object):
 
         metadesc = self.og_description if self.og_description else self.excerpt
         result["meta"] = {"yoast_wpseo_metadesc": metadesc}
+        if self.canonical:
+            result["meta"]["yoast_wpseo_canonical"] = self.canonical
+
         return result
 
     @staticmethod
