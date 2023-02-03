@@ -5,7 +5,7 @@ in your favorite editor and keeps all your blogs in git.
 ## features
 - converts markdown into plain html, with syntax hightlighting support
 - uploads and synchronizes any locally referenced images
-- generates an opengraph image including the title, subtitle and author in Binx.io style
+- generates an opengraph image including the title, subtitle and author in Binx.io or xebia.com style
 
 ## caveats
 - changing the slug may orphan images
