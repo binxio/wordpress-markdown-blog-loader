@@ -6,6 +6,7 @@ from pathlib import Path
 from slugify import slugify
 from PIL import Image
 from wordpress_markdown_blog_loader.blog import Blog
+from wordpress_markdown_blog_loader.name_to_email import name_to_email
 from datetime import datetime, timedelta
 import logging
 from io import BytesIO
@@ -67,6 +68,7 @@ def command(title, subtitle, author, image, brand):
     blog.slug = slug
     blog.author = author
     blog.brand = brand
+    blog.email = name_to_email(author)
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
