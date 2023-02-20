@@ -60,6 +60,7 @@ class Blog(object):
     @property
     def canonical(self):
         return self.blog.metadata.get("canonical")
+
     @canonical.setter
     def canonical(self, value):
         if value:
@@ -189,7 +190,6 @@ class Blog(object):
     def image_path(self) -> Optional[Path]:
         return Path(self.dir).joinpath(self.image) if self.image else None
 
-
     @property
     def email(self) -> Optional[str]:
         return self.blog.metadata.get("email")
@@ -211,8 +211,12 @@ class Blog(object):
         logging.info("generating new image in %s", out_file)
         blog = ImageGeneratorBlog(self.title, self.subtitle, self.author, self.email)
         generate_og_image(
-            blog, in_file, out_file, overwrite=True, gradient_magnitude=0.9,
-            brand=self.brand
+            blog,
+            in_file,
+            out_file,
+            overwrite=True,
+            gradient_magnitude=0.9,
+            brand=self.brand,
         )
 
     @property
