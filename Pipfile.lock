@@ -26,9 +26,9 @@
         },
         "binx-og-image-generator": {
             "hashes": [
-                "sha256:d5f8baa0f116afe4a02a30cf0dbe61bc98d511273c4ef8beabb2e1bc9aa6088a"
+                "sha256:0fd513e519ef22cb5aba135d1e3aee7913f5ab9d75ee5ac1defd8bd2017852b8"
             ],
-            "version": "==1.0.6"
+            "version": "==1.1.0"
         },
         "bs4": {
             "hashes": [
