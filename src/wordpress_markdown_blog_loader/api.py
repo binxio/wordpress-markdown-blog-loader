@@ -274,6 +274,11 @@ class Wordpress(object):
         return User(self.get("users", resource_id))
 
     def get_unique_user_by_name(self, name: str) -> "User":
+
+        user = self.get_user_by_id("me")
+        if user and user.name == name:
+            return user
+
         users = self.users({"search": name})
         if len(users) == 0:
             raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
@@ -362,7 +367,7 @@ class Wordpress(object):
                     params={"force": 1},
                 )
                 if delete_response.status_code not in [200, 201, 202]:
-                    raise Exception(response.text)
+                    raise Exception(delete_response.text)
 
             filename = f"{slug}{path.suffix}"
             print(f"INFO: uploading image as {filename}")
