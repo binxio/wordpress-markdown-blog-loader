@@ -7,6 +7,7 @@ from wordpress_markdown_blog_loader import (
     new,
     update_canonical,
     change_guid,
+    add_email,
     regenerate_og_images
 )
 
