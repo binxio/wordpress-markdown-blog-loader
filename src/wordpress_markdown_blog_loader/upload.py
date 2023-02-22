@@ -82,6 +82,10 @@ def command(host: str, blog: str, regenerate_og_image: bool):
     Reads the frontmatter describing the blog from the file index.md in the `blog` directory.
     """
     blog = Blog.load(os.path.join(blog, "index.md"))
+    if not blog.slug:
+        logging.error("slug is required for the blog in %s", blog)
+        exit(1)
+
     if blog.image and (regenerate_og_image or not blog.og_image):
         logging.info("generating og:image based on %s", blog.image)
         if not blog.brand:
@@ -92,6 +96,7 @@ def command(host: str, blog: str, regenerate_og_image: bool):
         blog.brand = host
         blog.generate_og_image()
         blog.save()
+
 
     wordpress = Wordpress(host)
     wordpress.connect()
