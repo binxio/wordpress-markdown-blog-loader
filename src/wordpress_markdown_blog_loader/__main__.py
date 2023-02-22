@@ -7,7 +7,7 @@ from wordpress_markdown_blog_loader import (
     new,
     update_canonical,
     change_guid,
-    add_email,
+    regenerate_og_images
 )
 
 
@@ -35,6 +35,7 @@ posts.add_command(new.update_banner_command)
 posts.add_command(update_canonical.command)
 posts.add_command(change_guid.command)
 posts.add_command(add_email.command)
+posts.add_command(regenerate_og_images.command)
 
 
 if __name__ == "__main__":

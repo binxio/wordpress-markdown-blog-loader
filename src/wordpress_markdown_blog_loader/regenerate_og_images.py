@@ -28,5 +28,12 @@ def command(blog):
 
     for blog in blogs:
         blog = Blog.load(os.path.join(blog, "index.md"))
-        blog.generate_og_image()
+        if blog.image:
+            try:
+                blog.generate_og_image()
+            except Exception as error:
+                logging.error("failed to generate og-banner for %s, %s", blog.dir, error)
+
+        else:
+            logging.warning("no featured image in %s", blog.dir)
         blog.save()
