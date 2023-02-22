@@ -11,12 +11,13 @@ dependencies = [
     "click",
     "pytz",
     "Pillow",
-    "binx-og-image-generator>=1.1.0",
+    "binx-og-image-generator>=1.2.1",
     "markdownify",
     "bs4",
     "html5lib",
     "lxml",
     "python-slugify",
+    "unidecode"
 ]
 
 this_directory = path.abspath(path.dirname(__file__))
