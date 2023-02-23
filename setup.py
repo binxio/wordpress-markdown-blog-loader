@@ -11,7 +11,7 @@ dependencies = [
     "click",
     "pytz",
     "Pillow",
-    "binx-og-image-generator>=1.2.4",
+    "binx-og-image-generator>=1.2.5",
     "markdownify",
     "bs4",
     "html5lib",
@@ -26,7 +26,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="wordpress-markdown-blog-loader",
-    version="0.11.1",
+    version="0.11.3",
     url="https://github.com/binxio/wordpress-markdown-blog-loader",
     license="APL2",
     author="Mark van Holsteijn",
