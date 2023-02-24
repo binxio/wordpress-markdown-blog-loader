@@ -8,6 +8,8 @@ from typing import List, Dict, Iterator
 from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
 import mimetypes
+import numpy
+
 
 import pytz
 import requests
@@ -87,6 +89,10 @@ class User(dict):
     @property
     def id(self):
         return self.get("id")
+
+    @property
+    def email(self):
+        return self.get("email")
 
 
 class Medium(dict):
@@ -273,19 +279,21 @@ class Wordpress(object):
     def get_user_by_id(self, resource_id: int) -> "User":
         return User(self.get("users", resource_id))
 
-    def get_unique_user_by_name(self, name: str) -> "User":
+    def get_unique_user_by_name(self, name: str, email: Optional[str]) -> "User":
 
         user = self.get_user_by_id("me")
         if user and user.name == name:
             return user
 
-        users = self.users({"search": name})
+        users = self.users({"context": "edit", "search": name})
         if len(users) == 0:
             raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
         elif len(users) > 1:
-            raise ValueError(
-                f"author name '{name}' results in multiple matches in {self.endpoint.host}"
-            )
+            user = next(filter(lambda u: email and u.email == email, users), None)
+            if not user:
+                raise ValueError(
+                    f"Multiple authors named '{name}' found, none with email {email}"
+                )
         return users[0]
 
     def posts(self, query: dict = None) -> Iterator["Post"]:
@@ -348,7 +356,10 @@ class Wordpress(object):
         stored_image = self.search_for_image_by_slug(slug)
         if stored_image:
             response = self.session.get(
-                stored_image.url, headers=self.headers, stream=True, auth=self.auth
+                stored_image.url,
+                headers={"User-Agent": self.headers["User-Agent"]},
+                stream=True,
+                auth=self.auth,
             )
             assert response.status_code == 200
             old_content = response.content

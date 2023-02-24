@@ -323,7 +323,7 @@ class Blog(object):
             self.uploaded_images[filename] = wp.upload_media(slug, path)
 
     def to_wordpress(self, wp: Wordpress) -> dict:
-        author = wp.get_unique_user_by_name(self.author)
+        author = wp.get_unique_user_by_name(self.author, self.email)
         self.upload_local_images(wp)
         result = {
             "title": self.title,
