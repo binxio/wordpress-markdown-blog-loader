@@ -68,6 +68,21 @@ class Blog(object):
         else:
             self.blog.metadata.pop("canonical", "")
 
+    @property
+    def focus_keywords(self):
+        """
+        yoast focus keywords to determine SEO effectiveness. Can only be uploaded, not
+        retrieved. You just gotto love WP 😬
+        """
+        return self.blog.metadata.get("focus-keywords")
+
+    @focus_keywords.setter
+    def focus_keywords(self, value):
+        if value:
+            self.blog.metadata["focus-keywords"] = value
+        else:
+            self.blog.metadata.pop("focus-keywords", "")
+
     @permalink_template.setter
     def permalink_template(self, permalink_template):
         self.blog.metadata["permalink_template"] = permalink_template
@@ -336,9 +351,7 @@ class Blog(object):
             "status": self.status,
             "author": author.id,
             "categories": [wp.get_category_id_by_name(c) for c in self.categories],
-            "acf": {
-                "show_header_image" : bool(self.image)
-            },
+            "acf": {"show_header_image": bool(self.image)},
         }
 
         if self.permalink_template:
@@ -353,6 +366,9 @@ class Blog(object):
         result["meta"] = {"yoast_wpseo_metadesc": metadesc}
         if self.canonical:
             result["meta"]["yoast_wpseo_canonical"] = self.canonical
+
+        if self.focus_keywords:
+            result["meta"]["yoast_wpseo_focuskw"] = self.focus_keywords
 
         return result
 
@@ -395,8 +411,10 @@ class Blog(object):
             blog.og_description = post.og_description
 
         if post.featured_media:
-            if 'acf' not in post:
-                logging.warning("Advanced Custom Field groups is not enabled for the REST API.")
+            if "acf" not in post:
+                logging.warning(
+                    "Advanced Custom Field groups is not enabled for the REST API."
+                )
             featured_media: Medium = Medium(wordpress.get("media", post.featured_media))
             url = urlparse(featured_media.url)
 
