@@ -12,8 +12,11 @@ in your favorite editor and keeps all your blogs in git.
 - removing images from the markdown, will leave dangling images in Wordpress
 
 ## required Wordpress Plugins
+
 - [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/)
 - [REST API Meta Support](https://wordpress.org/plugins/rest-api-meta-support/)
+
+Furthermore, you have to enable the Rest API for the [Custom Field Group](https://www.advancedcustomfields.com/resources/wp-rest-api-integration/#enabling-the-rest-api-for-your-acf-fields) for the field `show_header_image`.
 
 ## configuration
 to configure the access credentials, you need to add your WordPress application password to the file `~/.wordpress.ini`  

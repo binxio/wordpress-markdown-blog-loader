@@ -336,6 +336,9 @@ class Blog(object):
             "status": self.status,
             "author": author.id,
             "categories": [wp.get_category_id_by_name(c) for c in self.categories],
+            "acf": {
+                "show_header_image" : bool(self.image)
+            },
         }
 
         if self.permalink_template:
@@ -392,6 +395,8 @@ class Blog(object):
             blog.og_description = post.og_description
 
         if post.featured_media:
+            if 'acf' not in post:
+                logging.warning("Advanced Custom Field groups is not enabled for the REST API.")
             featured_media: Medium = Medium(wordpress.get("media", post.featured_media))
             url = urlparse(featured_media.url)
 

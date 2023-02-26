@@ -344,7 +344,7 @@ class Wordpress(object):
         response = self.session.get(
             url, headers=self.headers, stream=True, auth=self.auth
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"status code {response.status_code}"
         return response.content
 
     def upload_media(self, slug: str, path: Path) -> Medium:
