@@ -97,7 +97,6 @@ def command(host: str, blog: str, regenerate_og_image: bool):
         blog.generate_og_image()
         blog.save()
 
-
     wordpress = Wordpress(host)
     wordpress.connect()
 
