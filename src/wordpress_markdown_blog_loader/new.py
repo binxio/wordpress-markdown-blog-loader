@@ -7,6 +7,8 @@ from slugify import slugify
 from PIL import Image
 from wordpress_markdown_blog_loader.blog import Blog
 from wordpress_markdown_blog_loader.name_to_email import name_to_email
+import stopwords
+
 from datetime import datetime, timedelta
 import logging
 from io import BytesIO
@@ -64,6 +66,7 @@ def command(title, subtitle, author, image, brand):
     blog.path = directory.joinpath("index.md")
     blog.title = title
     blog.subtitle = subtitle
+    blog.focus_keywords = " ".join(stopwords.clean(title.lower().split(), "en"))
     blog.status = "draft"
     blog.slug = slug
     blog.author = author

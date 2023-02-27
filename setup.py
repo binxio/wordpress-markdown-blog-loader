@@ -17,7 +17,8 @@ dependencies = [
     "html5lib",
     "lxml",
     "python-slugify",
-    "unidecode"
+    "unidecode",
+    "stopwords",
 ]
 
 this_directory = path.abspath(path.dirname(__file__))
