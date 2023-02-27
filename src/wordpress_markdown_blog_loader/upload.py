@@ -60,7 +60,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 
     broken = check_links(post.content)
     for link in broken:
-        logging.warning("broken link in post: %s", broken[-1])
+        logging.warning("broken link in post: %s", broken)
     logging.info("post available at %s", post.link)
 
     return 0
