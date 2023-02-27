@@ -6,6 +6,7 @@ import click
 
 from wordpress_markdown_blog_loader.api import Wordpress, Post
 from wordpress_markdown_blog_loader.blog import Blog
+from wordpress_markdown_blog_loader.check_links import check_links
 import sys
 
 
@@ -57,6 +58,9 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
         if post.featured_media != banner.medium_id:
             wp.update_post(blog.guid, {"featured_media": banner.medium_id})
 
+    broken = check_links(post.content)
+    for link in broken:
+        logging.warning("broken link in post: %s", broken[-1])
     logging.info("post available at %s", post.link)
 
     return 0

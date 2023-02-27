@@ -1,7 +1,7 @@
 import logging
 import os
 import click
-from wordpress_markdown_blog_loader import upload, download, new
+from wordpress_markdown_blog_loader import upload, download, new, check_links
 
 
 @click.group()
@@ -25,6 +25,7 @@ posts.add_command(upload.command)
 posts.add_command(download.command)
 posts.add_command(new.command)
 posts.add_command(new.update_banner_command)
+posts.add_command(check_links.command)
 
 
 if __name__ == "__main__":
