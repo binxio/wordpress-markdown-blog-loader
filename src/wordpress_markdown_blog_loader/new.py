@@ -39,6 +39,7 @@ class ImageType(click.ParamType):
 @click.option("--title", required=True, help="of the blog")
 @click.option("--subtitle", required=True, help="of the blog")
 @click.option("--author", required=True, help="of the blog")
+@click.option("--email", required=False, help="of the author")
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
 @click.option(
     "--brand",
@@ -47,7 +48,7 @@ class ImageType(click.ParamType):
     default="xebia.com",
     help="of the banner",
 )
-def command(title, subtitle, author, image, brand):
+def command(title, subtitle, author, image, brand, email):
     """
     a new frontmatter blog
 
@@ -71,7 +72,7 @@ def command(title, subtitle, author, image, brand):
     blog.slug = slug
     blog.author = author
     blog.brand = brand
-    blog.email = name_to_email(author)
+    blog.email = email if email else name_to_email(author)
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )

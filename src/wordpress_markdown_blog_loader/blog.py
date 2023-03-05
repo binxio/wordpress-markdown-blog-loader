@@ -401,7 +401,9 @@ class Blog(object):
         blog.slug = post.slug
         blog.status = post.status
         blog.brand = wordpress.endpoint.host
-        blog.canonical = post.get('yoast_head_json',{}).get('canonical', blog.canonical)
+        blog.canonical = post.get("yoast_head_json", {}).get(
+            "canonical", blog.canonical
+        )
 
         if post.permalink_template and not blog.permalink_template:
             # keeping the permalink template registered in the blog metadata.
