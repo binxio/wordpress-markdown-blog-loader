@@ -9,6 +9,6 @@ def remove_newlines_from_paragraphs(document: str) -> str:
     doc = BeautifulSoup(document, 'html.parser')
     for paragraph in doc.find_all('p', recursive=True):
         for child in paragraph.children:
-            if not child.name:diff
+            if not child.name:
                 child.replace_with(child.replace("\n", " "))
     return str(doc)
