@@ -16,14 +16,14 @@ from binx_og_image_generator.generator import Blog as ImageGeneratorBlog
 from markdown import markdown
 from wordpress_markdown_blog_loader.api import Post, Medium
 from wordpress_markdown_blog_loader.api import Wordpress, WordpressEndpoint
-
+from wordpress_markdown_blog_loader.remove_newlines import remove_newlines_from_paragraphs
 
 class Blog(object):
     def __init__(self):
         self.dir: Path = None
         self.path: Path = None
         self.blog: frontmatter.Post = frontmatter.Post(content="")
-        self.uploaded_images: dict[str, Image] = {}
+        self.uploaded_images: dict[str, Media] = {}
         self.markdown_image_pattern = re.compile(
             r'\!\[(?P<alt_text>[^]]*)\]\((?P<url>.*?)(?P<caption>\s*"[^"]*?")?\)'
         )
@@ -254,7 +254,9 @@ class Blog(object):
             return match.group(0)
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
-        return markdown(content, extensions=["fenced_code", "attr_list", "tables"])
+        html = markdown(content, extensions=["fenced_code", "attr_list", "tables", "footnotes"])
+        return remove_newlines_from_paragraphs(html)
+
 
     @property
     def local_image_references(self) -> set[str]:
