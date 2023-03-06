@@ -6,7 +6,5 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['buildx', 'build', '.', '-t', '${_IMAGE}', '--platform', 'linux/arm64,linux/amd64', '--output', 'type=image,push=true']
 
-images: ['${_IMAGE}']
-
 substitutions:
   _IMAGE: 'gcr.io/${PROJECT_ID}/${REPO_NAME}:${TAG_NAME:-${SHORT_SHA}}'
