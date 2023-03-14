@@ -26,14 +26,15 @@ and add a section for your Wordpress installation:
 
 ```
 [DEFAULT]
-host = example.com
+host = xebia.com
 
-[example.com]
-api_host = example.wpengine.com
+[xebia.com]
 username = <your wordpress username>
 password = <your application passwoird>
 ```
 Note that the application password is different from the password you use to login to your WordPress installation.
+
+If the site is served through a CDN, you can also set the `api_host` which will be used as the hostname to invoke the WP REST API. 
 
 ## Using the image
 To use the docker image, you have to login using a GitHub container registry access token:
