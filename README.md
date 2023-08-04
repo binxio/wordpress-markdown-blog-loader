@@ -12,6 +12,7 @@ in your favorite editor and keeps all your blogs in git.
 ## caveats
 - changing the slug may orphan images
 - removing images from the markdown, will leave dangling images in Wordpress
+- you cannot edit via WP and via the uploader, without confusing yourself
 
 ## required Wordpress Plugins
 
@@ -35,6 +36,12 @@ password = <your application passwoird>
 Note that the application password is different from the password you use to login to your WordPress installation.
 
 If the site is served through a CDN, you can also set the `api_host` which will be used as the hostname to invoke the WP REST API. 
+
+## Never touch the WP editor again
+
+Once you start to manage your blogs via this uploader, *do not edit* the blog via one of the WP editors. The editors are weird,
+because it appears to make a copy of the content on which you get a WYSIWIG viewer. Unfortunately, it does not detect changes
+in the actual blog content. It will look like your uploaded changes are not applied (but they are).
 
 ## Using the image
 To use the docker image, you have to login using a GitHub container registry access token:
