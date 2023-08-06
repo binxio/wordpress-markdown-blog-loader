@@ -31,7 +31,7 @@ host = xebia.com
 
 [xebia.com]
 username = <your wordpress username>
-password = <your application passwoird>
+password = <your application password>
 ```
 Note that the application password is different from the password you use to login to your WordPress installation.
 
@@ -58,7 +58,7 @@ To use the docker image, you have to login using a GitHub container registry acc
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
-alias wp-md='docker run -v $HOME:$HOME -v $HOME/.wordpress.ini:/root/.wordpress.ini -v $PWD:/$PWD -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:main'
+alias wp-md='docker run -v $HOME:$HOME -v $HOME/.wordpress.ini:/root/.wordpress.ini -v $PWD:/$PWD -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.1.0
 ```
 
 ## start a new blog
