@@ -223,6 +223,10 @@ class Post(dict):
         self["permalink_template"] = template
 
 
+class PermissionDenied(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
 class Wordpress(object):
     def __init__(self, host: Optional[str] = None):
         self.endpoint = WordpressEndpoint.load(host)
@@ -268,8 +272,12 @@ class Wordpress(object):
                 total_pages = int(response.headers["X-WP-TotalPages"])
                 page = page + 1
             else:
-                print(f"failed to get all {resource}: {response.text}")
-                exit(1)
+                msg = f"failed to get all {resource}: {response.status_code}, {response.text}"
+                if response.status_code in [401,403]:
+                    raise PermissionDenied(msg)
+                else:
+                    print(msg)
+                    exit(1)
 
         return None
 
@@ -285,7 +293,14 @@ class Wordpress(object):
         if user and user.name == name:
             return user
 
-        users = self.users({"context": "edit", "search": name})
+
+        users = []
+        try:
+            users = self.users({"context": "edit", "search": name})
+        except PermissionDenied as error:
+            logging.error("You have no permission to search for other users.\n        Make sure your author name '%s' matches your WP display name '%s' or visa versa", name, user.name)
+            exit(1)
+
         if len(users) == 0:
             raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
         elif len(users) > 1:
