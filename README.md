@@ -21,6 +21,12 @@ in your favorite editor and keeps all your blogs in git.
 
 Furthermore, you have to enable the Rest API for the [Custom Field Group](https://www.advancedcustomfields.com/resources/wp-rest-api-integration/#enabling-the-rest-api-for-your-acf-fields) for the field `show_header_image`.
 
+## Installation
+Install it with [pipx](https://pypa.github.io/pipx/) or use Docker (see below):
+```shell
+pipx install wordpress-markdown-blog-loader
+```
+
 ## configuration
 to configure the access credentials, you need to add your WordPress application password to the file `~/.wordpress.ini`  
 and add a section for your Wordpress installation:
