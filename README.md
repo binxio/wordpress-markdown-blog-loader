@@ -50,17 +50,6 @@ because it appears to make a copy of the content on which you get a WYSIWIG view
 in the actual blog content. It will look like your uploaded changes are not applied (but they are).
 
 ## Using the image
-To use the docker image, you have to login using a GitHub container registry access token:
-
-1. Browse to https://github.com/settings/tokens
-2. Create new token with 'read:packages' permission
-3. Copy the token
-4. login to  ghcr.io with Docker.
-
-   `pbpaste | docker login ghcr.io -u <github username> --password-stdin`
-
-
-## set an alias
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
