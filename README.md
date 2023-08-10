@@ -49,7 +49,7 @@ Once you start to manage your blogs via this uploader, *do not edit* the blog vi
 because it appears to make a copy of the content on which you get a WYSIWIG viewer. Unfortunately, it does not detect changes
 in the actual blog content. It will look like your uploaded changes are not applied (but they are).
 
-## Using the image
+## Using the docker image
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
@@ -72,6 +72,28 @@ INFO: start editing index.md in ./how-to-create-a-wordpress-blog-without-touchin
 
 A skaffold frontmatter blog is created, and you can start writing in the index.md.
 
+##  frontmatter properties
+You can set the following properties in the frontmatter:
+
+| Name           | description                                                             |
+|----------------|-------------------------------------------------------------------------|
+| title          | of the blog                                                             |
+| subtitle       | of the blog, used in the og.image                                       |
+| focus-keywords | the SEO focus keywords
+| excerpt        | excerpt of the blog                                                     |
+| author         | display name of the author in Wordpress                                 |
+| categories     | list of wordpress categories for this blog                              |
+| slug           | slug of the blog                                                        |
+| date           | on which the blog should be published ISO timestamp format              |
+| status         | draft or publish. if publish, the blog will be published on the `date`  |
+| canonical      | url of the blog, to be used in cross posts                              |
+| image          | the banner image of the blog                                            |
+| og.image       | the open graph image of the blog, used in links from social media       |
+| og.description | the open graph description of the blog, used in links from social media |
+| guid           | the physical URL of the blog. Written by wp-md on upload and download   |
+| brand          | xebia.com or xebia.com. defaults to xebia.com                             |
+
+
 ## adding images
 To add an image to your blog, add the images in the ./images subdirectory and add a relative reference in markdown. For instance:
 
@@ -83,7 +105,7 @@ To add an image to your blog, add the images in the ./images subdirectory and ad
 To upload a blog, type:
 
 ```
-$ wp-md posts upload --host binx.io .
+$ wp-md posts upload --host xebia.com .
 INFO: generating og:image based on images/banner.jpg
 INFO: generating new image in how-to-create-a-wordpress-blog-without-touching-wordpress/images/og-banner.jpg
 INFO: add logo
@@ -91,9 +113,9 @@ INFO: add title
 INFO: add subtitle
 INFO: add author
 INFO: og image saved to how-to-create-a-wordpress-blog-without-touching-wordpress/images/og-banner.jpg
-INFO: uploaded blog 'How to create a WordPress blog without touching WordPress' as post https://binx.io/?p=9625
-INFO: updating opengraph image to https://binx.io/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-og-banner.jpg
-INFO: post available at https://binx.io/?p=9625
+INFO: uploaded blog 'How to create a WordPress blog without touching WordPress' as post https://xebia.com/?p=9625
+INFO: updating opengraph image to https://xebia.com/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-og-banner.jpg
+INFO: post available at https://xebia.com/?p=9625
 INFO: uploading image as how-to-create-a-wordpress-blog-without-touching-wordpress-og-banner.jpg
 INFO: uploading image as how-to-create-a-wordpress-blog-without-touching-wordpress-banner.jpg
 ```
@@ -103,16 +125,23 @@ You can update the blog, by uploading it again.  If you change the status to 'pu
 the blog will be published on the specified date.
 
 ```
-$ wp-md posts upload --host binx.io .
+$ wp-md posts upload --host xebia.com .
+```
+
+## updating banner and open graph images
+You can update the banner and open graph images as follows:
+
+```
+$ wp-md posts update-banner . new-banner.jpg
 ```
 
 ## downloading an existing blog
 to download an existing blog and convert it to markdown, type:
 
 ```
-$ wp-md posts download --host binx.io --directory /tmp 9625
-INFO: downloading https://binx.io/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-banner.jpg as banner.jpg
-INFO: downloading https://binx.io/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-og-banner.jpg as og-banner.jpg
+$ wp-md posts download --host xebia.com --directory /tmp 9625
+INFO: downloading https://xebia.com/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-banner.jpg as banner.jpg
+INFO: downloading https://xebia.com/wp-content/uploads/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress-og-banner.jpg as og-banner.jpg
 INFO: writing /tmp/2023/01/how-to-create-a-wordpress-blog-without-touching-wordpress/index.md
 ```
 
