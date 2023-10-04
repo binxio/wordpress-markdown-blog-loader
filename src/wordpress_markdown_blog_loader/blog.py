@@ -369,7 +369,12 @@ class Blog(object):
             )
 
         metadesc = self.og_description if self.og_description else self.excerpt
-        result["meta"] = {"yoast_wpseo_metadesc": metadesc}
+        result["meta"] = {
+            "yoast_wpseo_metadesc": metadesc,
+            "yoast_wpseo_opengraph-description": metadesc,
+            "yoast_wpseo_twitter-description": metadesc,
+        }
+
         if self.canonical:
             result["meta"]["yoast_wpseo_canonical"] = self.canonical
 
