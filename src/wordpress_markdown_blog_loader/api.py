@@ -9,6 +9,7 @@ from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
 import mimetypes
 import numpy
+from functools import cache
 
 
 import pytz
@@ -166,6 +167,10 @@ class Post(dict):
         return self.get("categories", [])
 
     @property
+    def tags(self) -> list[int]:
+        return self.get("tags", [])
+
+    @property
     def author(self) -> int:
         return self["author"]
 
@@ -232,7 +237,6 @@ class Wordpress(object):
         self.endpoint = WordpressEndpoint.load(host)
 
         self._media: List[Medium] = {}
-        self._categories: Dict[str, int] = {}
         self.headers = {
             "accept": "application/json",
             "User-Agent": "Wordpress markdown blog loader - Python",
@@ -337,10 +341,24 @@ class Wordpress(object):
         return self._media
 
     @property
+    @cache
     def categories(self) -> Dict[str, int]:
-        if not self._categories:
-            self._categories = {c["slug"]: c["id"] for c in self.get_all("categories")}
-        return self._categories
+        return {c["slug"]: c["id"] for c in self.get_all("categories")}
+    @property
+    @cache
+    def categories_by_id(self) -> Dict[int, str]:
+        return {id: slug for slug,id in self.categories.items()}
+
+    @property
+    @cache
+    def tags(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("tags")}
+
+    @property
+    @cache
+    def tags_by_id(self) -> Dict[int, str]:
+        return {id: slug for slug, id in self.tags.items()}
+
 
     def search_for_image_by_slug(self, slug) -> Optional[Medium]:
         response = self.session.get(
@@ -487,5 +505,15 @@ class Wordpress(object):
         raise ValueError(
             "invalid category '{}' try one of\n {}".format(
                 category, ",\n ".join(self.categories.keys())
+            )
+        )
+
+    def get_tag_id_by_name(self, tag: str) -> str:
+        if tag in self.tags:
+            return self.tags[tag]
+
+        raise ValueError(
+            "invalid tag '{}' try one of\n {}".format(
+                tag, ",\n ".join(self.tags.keys())
             )
         )

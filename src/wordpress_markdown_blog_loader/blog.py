@@ -189,6 +189,14 @@ class Blog(object):
         self.blog.metadata["categories"] = categories
 
     @property
+    def tags(self):
+        return self.blog.metadata.get("tags", [])
+
+    @tags.setter
+    def tags(self, tags: list[str]):
+        self.blog.metadata["tags"] = tags
+
+    @property
     def guid(self):
         return self.blog.metadata.get("guid")
 
@@ -357,6 +365,7 @@ class Blog(object):
             "status": self.status,
             "author": author.id,
             "categories": [wp.get_category_id_by_name(c) for c in self.categories],
+            "tags": [wp.get_tag_id_by_name(c) for c in self.tags],
             "acf": {"show_header_image": bool(self.image)},
         }
 
@@ -390,8 +399,6 @@ class Blog(object):
         """
         convert a Wordpress post to a FrontMatter post
         """
-        categories = {id: name for name, id in wordpress.categories.items()}
-
         blog = Blog()
         blog.dir = (
             Path(base_directory)
@@ -407,7 +414,9 @@ class Blog(object):
         blog.title = post.title
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
-        blog.categories = [categories[c] for c in post.categories]
+        blog.categories = [wordpress.categories_by_id[c] for c in post.categories]
+        if post.tags:
+            blog.tags = [wordpress.tags_by_id[t] for t in post.tags]
         blog.date = post.date
         blog.slug = post.slug
         blog.status = post.status
