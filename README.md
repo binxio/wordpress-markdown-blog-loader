@@ -64,7 +64,8 @@ $ wp-md posts new \
 	--title "How to create a WordPress blog without touching WordPress" \
         --subtitle "using the wp-md utility" \
 	--author "Mark van Holsteijn" \
-	--image ~/Downloads/background-image.jpg
+	--image ~/Downloads/background-image.jpg \
+        --image-credits "image by xyz"
 INFO: resizing 1920x1920 to 1200x1200
 INFO: cropping to maximum height of 630px
 INFO: start editing index.md in ./how-to-create-a-wordpress-blog-without-touching-wordpress

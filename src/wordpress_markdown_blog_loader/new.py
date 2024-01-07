@@ -41,6 +41,7 @@ class ImageType(click.ParamType):
 @click.option("--author", required=True, help="of the blog")
 @click.option("--email", required=False, help="of the author")
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
+@click.option("--image-credits", required=False, type=str, help="for the used image")
 @click.option(
     "--brand",
     type=click.Choice(["xebia.com", "binx.io"]),
@@ -48,7 +49,7 @@ class ImageType(click.ParamType):
     default="xebia.com",
     help="of the banner",
 )
-def command(title, subtitle, author, image, brand, email):
+def command(title, subtitle, author, image, brand, email, image_credits):
     """
     a new frontmatter blog
 
@@ -65,8 +66,8 @@ def command(title, subtitle, author, image, brand, email):
     blog = Blog()
     blog.dir = directory
     blog.path = directory.joinpath("index.md")
-    blog.title = title
-    blog.subtitle = subtitle
+    blog.title = title.strip()
+    blog.subtitle = subtitle.strip()
     blog.focus_keywords = " ".join(stopwords.clean(title.lower().split(), "en"))
     blog.status = "draft"
     blog.slug = slug
@@ -76,9 +77,22 @@ def command(title, subtitle, author, image, brand, email):
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
+
+    if not blog.title:
+        click.echo("a title is required", err=True)
+        exit(1)
+
     if image:
         image_path = save_og_image(image, directory.joinpath("images/banner"))
         blog.image = image_path.relative_to(directory).as_posix()
+
+    blog.og_description = (
+        blog.title.lstrip().lower()[0]
+        + blog.title[1:]
+        + (", " + blog.subtitle if blog.subtitle else "")
+    )
+    if image_credits:
+        blog.content = f"\n\n___\n{image_credits}"
     blog.save()
     logging.info("start editing index.md in %s", blog.dir)
 
