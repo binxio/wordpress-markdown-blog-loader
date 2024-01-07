@@ -53,7 +53,7 @@ in the actual blog content. It will look like your uploaded changes are not appl
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
-alias wp-md='docker run -v $HOME:$HOME -v $HOME/.wordpress.ini:/root/.wordpress.ini -v $PWD:/$PWD -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.1.4
+alias wp-md='docker run -v $HOME:$HOME -v $HOME/.wordpress.ini:/root/.wordpress.ini -v $PWD:/$PWD -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.2.0
 ```
 
 ## start a new blog
