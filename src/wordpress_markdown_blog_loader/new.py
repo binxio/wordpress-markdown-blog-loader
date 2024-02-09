@@ -37,7 +37,7 @@ class ImageType(click.ParamType):
 
 @click.command(name="new")
 @click.option("--title", required=True, help="of the blog")
-@click.option("--subtitle", required=True, help="of the blog")
+@click.option("--subtitle", required=False, help="(Optional) subtitle of the blog")
 @click.option("--author", required=True, help="of the blog")
 @click.option("--email", required=False, help="of the author")
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
@@ -67,7 +67,8 @@ def command(title, subtitle, author, image, brand, email, image_credits):
     blog.dir = directory
     blog.path = directory.joinpath("index.md")
     blog.title = title.strip()
-    blog.subtitle = subtitle.strip()
+    if subtitle:
+        blog.subtitle = subtitle.strip()
     blog.focus_keywords = " ".join(stopwords.clean(title.lower().split(), "en"))
     blog.status = "draft"
     blog.slug = slug
