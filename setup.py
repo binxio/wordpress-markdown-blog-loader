@@ -11,7 +11,7 @@ dependencies = [
     "click",
     "pytz",
     "Pillow",
-    "binx-og-image-generator>=1.2.5",
+    "binx-og-image-generator>=1.2.6",
     "markdownify",
     "bs4",
     "html5lib",
