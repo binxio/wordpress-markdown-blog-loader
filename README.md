@@ -62,13 +62,13 @@ in the actual blog content. It will look like your uploaded changes are not appl
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
-alias wp-md='docker run 
- -e WP_APP_PASSWORD=$("$(op read "op://Private/wordpress app password/password")")
- -v $HOME:$HOME
- -v $HOME/.wordpress.ini:/root/.wordpress.ini 
- -v $PWD:/$PWD 
- -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.3.0
-```
+alias wp-md='docker run \
+ -e WP_APP_PASSWORD="$(op read "op://Private/wordpress app password/password")" \
+ -v $HOME:$HOME \
+ -v $HOME/.wordpress.ini:/root/.wordpress.ini \
+ -v $PWD:/$PWD \
+ -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.3.0'
+```'
 Assuming that your WordPress app password is stored in the 1password Private vault under the name `wordpress app password`
 
 ## start a new blog
