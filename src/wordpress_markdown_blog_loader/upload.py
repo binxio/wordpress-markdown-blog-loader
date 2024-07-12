@@ -68,7 +68,7 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 
 @click.command(name="upload")
 @click.option(
-    "--host", type=str, required=True, nargs=1, help="wordpress host to upload to"
+    "--host", type=str, required=False, nargs=1, help="wordpress host to upload to"
 )
 @click.option(
     "--regenerate-og-image",
