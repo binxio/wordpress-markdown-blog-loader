@@ -63,9 +63,12 @@ class WordpressEndpoint:
         config = configparser.ConfigParser()
         config.read(expanduser("~/.wordpress.ini"))
 
-        self.host = host if host else config.defaults().get("host")
-        assert host, "no host specified and no default host found"
 
+        if not host:
+            host = config.defaults().get("host")
+            assert host, "no host specified and no default host found"
+
+        self.host = host
         self.api_host = config.get(host, "api_host", fallback=self.host)
         self.url = f"https://{self.api_host}/wp-json/wp/v2"
 
