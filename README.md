@@ -37,11 +37,20 @@ host = xebia.com
 
 [xebia.com]
 username = <your wordpress username>
-password = <your application password>
 ```
-Note that the application password is different from the password you use to login to your WordPress installation.
 
+## api host
 If the site is served through a CDN, you can also set the `api_host` which will be used as the hostname to invoke the WP REST API. 
+
+## password
+To authenticate you need an [application password](https://wordpress.com/support/security/two-step-authentication/application-specific-passwords/), which is different from the user password.
+
+We recommend to store  your application password in 1password and set the environment variable
+  WP_APP_PASSWORD using the [1password CLI](https://developer.1password.com/docs/cli):
+
+```shell
+WP_APP_PASSWORD="$(op read "op://Private/wordpress app password/password")" wp-md ...
+```
 
 ## Never touch the WP editor again
 
@@ -53,8 +62,14 @@ in the actual blog content. It will look like your uploaded changes are not appl
 To use the docker image as a command line utility, create the following alias:
 
 ```bash
-alias wp-md='docker run -v $HOME:$HOME -v $HOME/.wordpress.ini:/root/.wordpress.ini -v $PWD:/$PWD -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.2.0
+alias wp-md='docker run 
+ -e WP_APP_PASSWORD=$("$(op read "op://Private/wordpress app password/password")")
+ -v $HOME:$HOME
+ -v $HOME/.wordpress.ini:/root/.wordpress.ini 
+ -v $PWD:/$PWD 
+ -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.3.0'
 ```
+Assuming that your WordPress app password is stored in the 1password Private vault under the name `wordpress app password`
 
 ## start a new blog
 To start a new blog, type:

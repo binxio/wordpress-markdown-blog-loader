@@ -1,20 +1,18 @@
 import configparser
 import logging
+import mimetypes
+import os
+import re
 from datetime import datetime
-from io import BytesIO
+from functools import cache
 from os.path import expanduser
 from pathlib import Path
 from typing import List, Dict, Iterator
 from typing import Optional, Union
 from urllib.parse import urlparse, ParseResult
-import mimetypes
-import numpy
-from functools import cache
-
 
 import pytz
 import requests
-from PIL import Image
 
 
 def get_default_host() -> Optional[str]:
@@ -24,6 +22,31 @@ def get_default_host() -> Optional[str]:
     config = configparser.ConfigParser()
     config.read(expanduser("~/.wordpress.ini"))
     return config.defaults().get("host")
+
+def get_password(host: str) -> Optional[str]:
+    """
+    Returns a password from the environment variable for the specified host.
+
+    The default environment variable is WP_APP_PASSWORD. A password for a specific host can be
+    specified by setting an environment variable WP_APP_PASSWORD_<host> where
+    the host name is all uppercase and non characters and digits replaced with _.
+
+    If not set, None is returned.
+
+    >>> os.environ["WP_APP_PASSWORD_XEBIA_COM"] = "host_password"
+    >>> get_password('xebia.com')
+    'host_password'
+    >>> get_password('binx.io') is None
+    True
+    >>> os.environ["WP_APP_PASSWORD"] = "default_password"
+    >>> get_password('binx.io')
+    'default_password'
+    """
+    h = re.sub(r"[^a-zA-Z-0-9]", "_", host).upper()
+    if result := os.getenv(f"WP_APP_PASSWORD_{h}"):
+        return result
+
+    return os.getenv("WP_APP_PASSWORD")
 
 
 class WordpressEndpoint:
@@ -45,8 +68,12 @@ class WordpressEndpoint:
 
         self.api_host = config.get(host, "api_host", fallback=self.host)
         self.url = f"https://{self.api_host}/wp-json/wp/v2"
+
         self.username = config.get(host, "username")
-        self.password = config.get(host, "password")
+        self.password = get_password(host)
+        if not self.password:
+            logging.warning("taking plain text app password from configuration file, use WP_APP_PASSWORD environment variable instead!")
+            self.password = config.get(host, "password")
 
     def is_host_for(self, url: Union[str, ParseResult]) -> bool:
         result = url if isinstance(url, ParseResult) else urlparse(url)
