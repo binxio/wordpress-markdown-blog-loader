@@ -330,7 +330,7 @@ class Wordpress(object):
 
         users = []
         try:
-            users = self.users({"context": "edit", "search": name})
+            users = self.users({"search": name})
         except PermissionDenied as error:
             logging.error("You have no permission to search for other users.\n        Make sure your author name '%s' matches your WP display name '%s' or visa versa", name, user.name)
             exit(1)
