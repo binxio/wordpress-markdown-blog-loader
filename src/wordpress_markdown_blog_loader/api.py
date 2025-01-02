@@ -338,10 +338,10 @@ class Wordpress(object):
         if len(users) == 0:
             raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
         elif len(users) > 1:
-            user = next(filter(lambda u: email and u.email == email, users), None)
+            user = next(filter(lambda u: email and u.email.lower() == email.lower(), users), None)
             if not user:
                 raise ValueError(
-                    f"Multiple authors named '{name}' found, none with email {email}"
+                    f"Multiple authors named '{name}' found, none with email {email} (possible: { {u.email for u in users} })."
                 )
         return users[0]
 
