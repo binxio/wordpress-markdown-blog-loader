@@ -343,6 +343,7 @@ class Wordpress(object):
                 raise ValueError(
                     f"Multiple authors named '{name}' found, none with email {email} (possible: { {u.email for u in users} })."
                 )
+            return user
         return users[0]
 
     def posts(self, query: dict = None) -> Iterator["Post"]:
