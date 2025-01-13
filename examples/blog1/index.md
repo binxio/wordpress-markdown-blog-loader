@@ -2,10 +2,13 @@
 author: Mark van Holsteijn
 categories:
 - uncategorized
-status: publish
+status: draft
 date: 2020-02-15 23:21:00+01:00
 og:
   image: images/og-banner.jpg
+  description: this goes to the Yoast og description.
+guid: https://xebia.com/wp-json/wp/v2/posts/58949
+focus-keywords: markdown upload wordpress
 slug: try-this-one
 status: publish
 title: Testing markdown upload through wordpress API
