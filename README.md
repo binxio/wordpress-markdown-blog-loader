@@ -6,7 +6,7 @@ in your favorite editor and keeps all your blogs in git.
 - converts markdown into plain html, with syntax hightlighting support
 - uploads and synchronizes any locally referenced images
 - generates an opengraph image including the title, subtitle and author in Binx.io or xebia.com style
-- sets the Yoast focus keywords
+- sets the Rankmath focus keywords
 - sets the canonical url, if specified
 
 ## caveats
@@ -16,7 +16,7 @@ in your favorite editor and keeps all your blogs in git.
 
 ## required Wordpress Plugins
 
-- [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/)
+- [Rankmath](https://rankmath.com/wordpress/plugin/seo-suite)
 - [REST API Meta Support](https://wordpress.org/plugins/rest-api-meta-support/)
 
 Furthermore, you have to enable the Rest API for the [Custom Field Group](https://www.advancedcustomfields.com/resources/wp-rest-api-integration/#enabling-the-rest-api-for-your-acf-fields) for the field `show_header_image`.

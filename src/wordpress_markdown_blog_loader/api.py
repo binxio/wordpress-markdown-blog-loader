@@ -1,8 +1,10 @@
 import configparser
+import json
 import logging
 import mimetypes
 import os
 import re
+import sys
 from datetime import datetime
 from functools import cache
 from os.path import expanduser
@@ -238,16 +240,15 @@ class Post(dict):
         """
         returns urls to the og:image links
         """
-        return list(
-            map(
-                lambda u: urlparse(u["url"]),
-                self.get("yoast_head_json", {}).get("og_image", []),
-            )
-        )
+        result = []
+        for name in ["rank_math_facebook_image", "rank_math_facebook_image"]:
+            if image := post.get("meta", {}).get(name):
+                result.append(image)
+        return result
 
     @property
     def og_description(self) -> Optional[str]:
-        return self.get("yoast_head_json", {}).get("og_description")
+        return self.get("meta", {}).get("rank_math_twitter_description")
 
     @property
     def permalink_template(self) -> Optional[str]:

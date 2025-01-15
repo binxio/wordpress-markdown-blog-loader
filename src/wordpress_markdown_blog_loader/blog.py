@@ -74,15 +74,16 @@ class Blog(object):
     @property
     def focus_keywords(self):
         """
-        yoast focus keywords to determine SEO effectiveness. Can only be uploaded, not
+        Keywords to determine SEO effectiveness. Can only be uploaded, not
         retrieved. You just gotto love WP 😬
         """
         return self.blog.metadata.get("focus-keywords")
 
+
     @focus_keywords.setter
     def focus_keywords(self, value):
         if value:
-            self.blog.metadata["focus-keywords"] = value
+            self.blog.metadata["focus-keywords"] = " ".join(value) if isinstance(value, list) else value
         else:
             self.blog.metadata.pop("focus-keywords", "")
 
@@ -379,16 +380,15 @@ class Blog(object):
 
         metadesc = self.og_description if self.og_description else self.excerpt
         result["meta"] = {
-            "yoast_wpseo_metadesc": metadesc,
-            "yoast_wpseo_opengraph-description": metadesc,
-            "yoast_wpseo_twitter-description": metadesc,
+            "rank_math_facebook_description": metadesc,
+            "rank_math_twitter_description": metadesc,
         }
 
         if self.canonical:
-            result["meta"]["yoast_wpseo_canonical"] = self.canonical
+            result["meta"]["rank_math_canonical_url"] = self.canonical
 
         if self.focus_keywords:
-            result["meta"]["yoast_wpseo_focuskw"] = self.focus_keywords
+            result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
 
         return result
 
@@ -421,8 +421,8 @@ class Blog(object):
         blog.slug = post.slug
         blog.status = post.status
         blog.brand = wordpress.endpoint.host
-        blog.canonical = post.get("yoast_head_json", {}).get(
-            "canonical", blog.canonical
+        blog.canonical = post.get("meta", {}).get(
+            "rank_math_canonical_url", blog.canonical
         )
 
         if post.permalink_template and not blog.permalink_template:

@@ -39,16 +39,19 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 
     if blog.og_image:
         og_image = wp.upload_media(f"{blog.slug}-og-banner", blog.og_image_path)
-        post_og_images = post.get("yoast_head_json", {}).get("og_image", [])
+        post_og_images = []
+        for name in ["rank_math_facebook_image","rank_math_facebook_image"]:
+            post_og_images.append(post.get("meta", {}).get(name))
         if not next(
-            filter(lambda b: b.get("url") == og_image.url, post_og_images), None
+            filter(lambda b: b and b.get("url") == og_image.url, post_og_images), None
         ):
             logging.info("updating opengraph image to %s", og_image.url)
             updated_post = wp.update_post(
                 blog.guid,
                 {
                     "meta": {
-                        "yoast_wpseo_opengraph-image": og_image.url,
+                        "rank_math_facebook_image": og_image.url,
+                        "rank_math_twitter_image": og_image.url,
                     }
                 },
             )
