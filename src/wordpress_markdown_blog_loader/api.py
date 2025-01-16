@@ -331,7 +331,9 @@ class Wordpress(object):
 
         users = []
         try:
-            users = self.users({"search": name})
+            # The email field is only returned when the context edit is passed.
+            # See: https://developer.wordpress.org/rest-api/reference/users/
+            users = self.users({"search": name, "context": "edit"})
         except PermissionDenied as error:
             logging.error("You have no permission to search for other users.\n        Make sure your author name '%s' matches your WP display name '%s' or visa versa", name, user.name)
             exit(1)
