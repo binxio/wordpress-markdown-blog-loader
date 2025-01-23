@@ -387,15 +387,14 @@ class Blog(object):
 
         metadesc = self.og_description if self.og_description else self.excerpt
         result["meta"] = {
-            "rank_math_facebook_description": metadesc,
-            "rank_math_twitter_description": metadesc,
+        #     "rank_math_facebook_description": metadesc,
+        #     "rank_math_twitter_description": metadesc,
         }
-
-        if self.canonical:
-            result["meta"]["rank_math_canonical_url"] = self.canonical
-
-        if self.focus_keywords:
-            result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
+        # if self.canonical:
+        #     result["meta"]["rank_math_canonical_url"] = self.canonical
+        #
+        # if self.focus_keywords:
+        #     result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
 
         return result
 
