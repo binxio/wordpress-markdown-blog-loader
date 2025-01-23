@@ -91,23 +91,25 @@ A skaffold frontmatter blog is created, and you can start writing in the index.m
 ##  frontmatter properties
 You can set the following properties in the frontmatter:
 
-| Name           | description                                                             |
-|----------------|-------------------------------------------------------------------------|
-| title          | of the blog                                                             |
-| subtitle       | of the blog, used in the og.image                                       |
-| focus-keywords | the SEO focus keywords
-| excerpt        | excerpt of the blog                                                     |
-| author         | display name of the author in Wordpress                                 |
-| categories     | list of wordpress categories for this blog                              |
-| slug           | slug of the blog                                                        |
-| date           | on which the blog should be published ISO timestamp format              |
-| status         | draft or publish. if publish, the blog will be published on the `date`  |
-| canonical      | url of the blog, to be used in cross posts                              |
-| image          | the banner image of the blog                                            |
-| og.image       | the open graph image of the blog, used in links from social media       |
-| og.description | the open graph description of the blog, used in links from social media |
-| guid           | the physical URL of the blog. Written by wp-md on upload and download   |
-| brand          | xebia.com or xebia.com. defaults to xebia.com                             |
+| Name           | description                                                                                                                                       |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| title          | of the blog                                                                                                                                       |
+| subtitle       | of the blog, used in the og.image                                                                                                                 |
+| focus-keywords | the SEO focus keywords                                                                                                                            
+| excerpt        | excerpt of the blog                                                                                                                               |
+| author         | display name of the author in Wordpress                                                                                                           |
+| email          | email address of the author, used to lookup profile picture on gravatar.com                                                                       |
+| author-id      | Wordpress author slug: used to select the appropriate user if multiple users with the same name exists in WP and we cannot read the email address |
+| categories     | list of wordpress categories for this blog                                                                                                        |
+| slug           | slug of the blog                                                                                                                                  |
+| date           | on which the blog should be published ISO timestamp format                                                                                        |
+| status         | draft or publish. if publish, the blog will be published on the `date`                                                                            |
+| canonical      | url of the blog, to be used in cross posts                                                                                                        |
+| image          | the banner image of the blog                                                                                                                      |
+| og.image       | the open graph image of the blog, used in links from social media                                                                                 |
+| og.description | the open graph description of the blog, used in links from social media                                                                           |
+| guid           | the physical URL of the blog. Written by wp-md on upload and download                                                                             |
+| brand          | xebia.com or xebia.com. defaults to xebia.com                                                                                                     |
 
 
 ## adding images

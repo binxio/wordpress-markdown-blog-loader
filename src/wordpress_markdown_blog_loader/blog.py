@@ -95,6 +95,13 @@ class Blog(object):
     def author(self):
         return self.blog.metadata.get("author")
 
+    @property
+    def author_id(self):
+        """ useful of the author has multiple user accounts on WP and we are not allowed to read
+        user's email addresses.
+        """
+        return self.blog.metadata.get("author-id")
+
     @author.setter
     def author(self, author):
         self.blog.metadata["author"] = author
@@ -353,7 +360,7 @@ class Blog(object):
             self.uploaded_images[filename] = wp.upload_media(slug, path)
 
     def to_wordpress(self, wp: Wordpress) -> dict:
-        author = wp.get_unique_user_by_name(self.author, self.email)
+        author = wp.get_unique_user_by_name(self.author, self.email, self.author_id)
         self.upload_local_images(wp)
         result = {
             "title": self.title,

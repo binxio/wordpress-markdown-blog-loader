@@ -127,6 +127,10 @@ class User(dict):
     def email(self):
         return self.get("email")
 
+    @property
+    def slug(self):
+        return self.get("slug")
+
 
 class Medium(dict):
     def __init__(self, properties: dict):
@@ -322,7 +326,7 @@ class Wordpress(object):
     def get_user_by_id(self, resource_id: int) -> "User":
         return User(self.get("users", resource_id))
 
-    def get_unique_user_by_name(self, name: str, email: Optional[str]) -> "User":
+    def get_unique_user_by_name(self, name: str, email: Optional[str], author_id: Optional[str]) -> "User":
 
         user = self.get_user_by_id("me")
         if user and user.name == name:
@@ -335,19 +339,25 @@ class Wordpress(object):
             # See: https://developer.wordpress.org/rest-api/reference/users/
             users = self.users({"search": name, "context": "edit"})
         except PermissionDenied as error:
-            logging.error("You have no permission to search for other users.\n        Make sure your author name '%s' matches your WP display name '%s' or visa versa", name, user.name)
-            exit(1)
+            logging.warning("Permission denied to read user email addresses")
+            users = self.users({"search": name})
 
         if len(users) == 0:
             raise ValueError(f"author '{name}' not found on {self.endpoint.host}")
-        elif len(users) > 1:
-            user = next(filter(lambda u: email and u.email and u.email.lower() == email.lower(), users), None)
-            if not user:
+        elif len(users) == 1:
+            return users[0]
+
+        user = next(filter(lambda u: (author_id and u.slug == author_id) or (not author_id and email and u.email and u.email.lower() == email.lower()), users), None)
+        if not user:
+            if author_id:
                 raise ValueError(
-                    f"Multiple authors named '{name}' found, none with email {email} (possible: { {u.email for u in users} })."
+                    f"Multiple authors named '{name}' found, none with author id {author_id} (possible: { {u.slug for u in users} })."
                 )
-            return user
-        return users[0]
+            else:
+                raise ValueError(
+                    f"Multiple authors named '{name}' found, but none with email {email} (possible: { {u.email for u in users} })."
+                )
+        return user
 
     def posts(self, query: dict = None) -> Iterator["Post"]:
         for p in self.get_all("posts", query):
