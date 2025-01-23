@@ -348,16 +348,21 @@ class Wordpress(object):
             return users[0]
 
         user = next(filter(lambda u: (author_id and u.slug == author_id) or (not author_id and email and u.email and u.email.lower() == email.lower()), users), None)
+        candidates = ", ".join(["{} / {}".format(u.slug, u.email) for u in users])
         if not user:
             if author_id:
                 raise ValueError(
-                    f"Multiple authors named '{name}' found, none with author id {author_id} (possible: { {u.slug for u in users} })."
+                    f"Multiple authors named '{name}' found, none with author id {author_id} (possible: {candidates})."
+                )
+            elif email:
+                raise ValueError(
+                    f"Multiple authors named '{name}' found, but none with email {email}. (possible: {candidates})."
                 )
             else:
                 raise ValueError(
-                    f"Multiple authors named '{name}' found, but none with email {email} (possible: { {u.email for u in users} })."
+                    f"Multiple authors named '{name}' found. (possible: {candidates})."
                 )
-        return user
+            return user
 
     def posts(self, query: dict = None) -> Iterator["Post"]:
         for p in self.get_all("posts", query):
