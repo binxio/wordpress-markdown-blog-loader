@@ -25,6 +25,7 @@ def get_default_host() -> Optional[str]:
     config.read(expanduser("~/.wordpress.ini"))
     return config.defaults().get("host")
 
+
 def get_password(host: str) -> Optional[str]:
     """
     Returns a password from the environment variable for the specified host.
@@ -65,7 +66,6 @@ class WordpressEndpoint:
         config = configparser.ConfigParser()
         config.read(expanduser("~/.wordpress.ini"))
 
-
         if not host:
             host = config.defaults().get("host")
             assert host, "no host specified and no default host found"
@@ -77,7 +77,9 @@ class WordpressEndpoint:
         self.username = config.get(host, "username")
         self.password = get_password(host)
         if not self.password:
-            logging.warning("taking plain text app password from configuration file, use WP_APP_PASSWORD environment variable instead!")
+            logging.warning(
+                "taking plain text app password from configuration file, use WP_APP_PASSWORD environment variable instead!"
+            )
             self.password = config.get(host, "password")
 
     def is_host_for(self, url: Union[str, ParseResult]) -> bool:
@@ -267,6 +269,7 @@ class PermissionDenied(Exception):
     def __init__(self, msg):
         super().__init__(msg)
 
+
 class Wordpress(object):
     def __init__(self, host: Optional[str] = None):
         self.endpoint = WordpressEndpoint.load(host)
@@ -312,7 +315,7 @@ class Wordpress(object):
                 page = page + 1
             else:
                 msg = f"failed to get all {resource}: {response.status_code}, {response.text}"
-                if response.status_code in [401,403]:
+                if response.status_code in [401, 403]:
                     raise PermissionDenied(msg)
                 else:
                     print(msg)
@@ -326,12 +329,13 @@ class Wordpress(object):
     def get_user_by_id(self, resource_id: int) -> "User":
         return User(self.get("users", resource_id))
 
-    def get_unique_user_by_name(self, name: str, email: Optional[str], author_id: Optional[str]) -> "User":
+    def get_unique_user_by_name(
+        self, name: str, email: Optional[str], author_id: Optional[str]
+    ) -> "User":
 
         user = self.get_user_by_id("me")
         if user and user.name == name:
             return user
-
 
         users = []
         try:
@@ -347,22 +351,34 @@ class Wordpress(object):
         elif len(users) == 1:
             return users[0]
 
-        user = next(filter(lambda u: (author_id and u.slug == author_id) or (not author_id and email and u.email and u.email.lower() == email.lower()), users), None)
-        candidates = ", ".join(["{} / {}".format(u.slug, u.email) for u in users])
-        if not user:
-            if author_id:
-                raise ValueError(
-                    f"Multiple authors named '{name}' found, none with author id {author_id} (possible: {candidates})."
-                )
-            elif email:
-                raise ValueError(
-                    f"Multiple authors named '{name}' found, but none with email {email}. (possible: {candidates})."
-                )
-            else:
-                raise ValueError(
-                    f"Multiple authors named '{name}' found. (possible: {candidates})."
-                )
+        if user := next(
+            filter(
+                lambda u: (author_id and u.slug == author_id)
+                or (
+                    not author_id
+                    and email
+                    and u.email
+                    and u.email.lower() == email.lower()
+                ),
+                users,
+            ),
+            None,
+        ):
             return user
+
+        candidates = ", ".join(["{} / {}".format(u.slug, u.email) for u in users])
+        if author_id:
+            raise ValueError(
+                f"Multiple authors named '{name}' found, none with author id {author_id} (possible: {candidates})."
+            )
+        elif email:
+            raise ValueError(
+                f"Multiple authors named '{name}' found, but none with email {email}. (possible: {candidates})."
+            )
+        else:
+            raise ValueError(
+                f"Multiple authors named '{name}' found. (possible: {candidates})."
+            )
 
     def posts(self, query: dict = None) -> Iterator["Post"]:
         for p in self.get_all("posts", query):
@@ -393,10 +409,11 @@ class Wordpress(object):
     @cache
     def categories(self) -> Dict[str, int]:
         return {c["slug"]: c["id"] for c in self.get_all("categories")}
+
     @property
     @cache
     def categories_by_id(self) -> Dict[int, str]:
-        return {id: slug for slug,id in self.categories.items()}
+        return {id: slug for slug, id in self.categories.items()}
 
     @property
     @cache
@@ -407,7 +424,6 @@ class Wordpress(object):
     @cache
     def tags_by_id(self) -> Dict[int, str]:
         return {id: slug for slug, id in self.tags.items()}
-
 
     def search_for_image_by_slug(self, slug) -> Optional[Medium]:
         response = self.session.get(
