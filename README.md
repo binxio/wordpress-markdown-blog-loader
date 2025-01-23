@@ -67,7 +67,7 @@ alias wp-md='docker run \
  -v $HOME:$HOME \
  -v $HOME/.wordpress.ini:/root/.wordpress.ini \
  -v $PWD:/$PWD \
- -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.5.2
+ -w $PWD ghcr.io/binxio/wordpress-markdown-blog-loader:1.5.3
 ```'
 Assuming that your WordPress app password is stored in the 1password Private vault under the name `wordpress app password`
 

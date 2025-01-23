@@ -1,5 +1,5 @@
 ---
-author: Alexander Bij
+author: Mark van Holsteijn
 brand: xebia.com
 categories:
 - uncategorized
@@ -11,7 +11,7 @@ image: images/banner.jpg
 og:
   description: this goes to the Rankmath og description through meta
   image: images/og-banner.jpg
-slug: try-this-one-2
+slug: try-this-one-5
 status: draft
 subtitle: using Google Cloud Run and Cloud Scheduler
 title: Testing markdown upload through wordpress API
