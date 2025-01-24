@@ -386,10 +386,11 @@ class Blog(object):
             )
 
         metadesc = self.og_description if self.og_description else self.excerpt
-        result["meta"] = {
+        logging.warning("facebook and twitter description, canonical url and focus keywords can not be set")
+        #result["meta"] = {
         #     "rank_math_facebook_description": metadesc,
         #     "rank_math_twitter_description": metadesc,
-        }
+        #}
         # if self.canonical:
         #     result["meta"]["rank_math_canonical_url"] = self.canonical
         #
