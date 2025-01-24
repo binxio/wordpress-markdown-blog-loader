@@ -248,8 +248,8 @@ class Post(dict):
         """
         result = []
         for name in ["rank_math_facebook_image", "rank_math_facebook_image"]:
-            if image := post.get("meta", {}).get(name):
-                result.append(image)
+            if image := self.get("meta", {}).get(name):
+                result.append(urlparse(image))
         return result
 
     @property
