@@ -39,23 +39,20 @@ def upsert_post(wp: Wordpress, blog: Blog) -> int:
 
     if blog.og_image:
         og_image = wp.upload_media(f"{blog.slug}-og-banner", blog.og_image_path)
-        post_og_images = []
+        post_og_images = set()
         for name in ["rank_math_facebook_image","rank_math_facebook_image"]:
-            post_og_images.append(post.get("meta", {}).get(name))
-        if not next(
-            filter(lambda b: b and b.get("url") == og_image.url, post_og_images), None
-        ):
-            logging.warning("opengraph image %s is uploaded, but metadata is not updated", og_image.url)
-            # logging.info("updating opengraph image to %s", og_image.url)
-            # updated_post = wp.update_post(
-            #     blog.guid,
-            #     {
-            #         "meta": {
-            #             "rank_math_facebook_image": og_image.url,
-            #             "rank_math_twitter_image": og_image.url,
-            #         }
-            #     },
-            # )
+            post_og_images.add(post.get("meta", {}).get(name))
+        if not og_image.url not in post_og_images:
+            logging.info("updating opengraph image to %s", og_image.url)
+            updated_post = wp.update_post(
+                blog.guid,
+                {
+                    "meta": {
+                        "rank_math_facebook_image": og_image.url,
+                        "rank_math_twitter_image": og_image.url,
+                    }
+                },
+            )
 
     if blog.image:
         banner = wp.upload_media(f"{blog.slug}-banner", blog.image_path)

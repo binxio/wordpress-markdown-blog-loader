@@ -386,16 +386,15 @@ class Blog(object):
             )
 
         metadesc = self.og_description if self.og_description else self.excerpt
-        logging.warning("facebook and twitter description, canonical url and focus keywords can not be set")
-        #result["meta"] = {
-        #     "rank_math_facebook_description": metadesc,
-        #     "rank_math_twitter_description": metadesc,
-        #}
-        # if self.canonical:
-        #     result["meta"]["rank_math_canonical_url"] = self.canonical
-        #
-        # if self.focus_keywords:
-        #     result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
+        result["meta"] = {
+            "rank_math_facebook_description": metadesc,
+            "rank_math_twitter_description": metadesc,
+        }
+        if self.canonical:
+            result["meta"]["rank_math_canonical_url"] = self.canonical
+
+        if self.focus_keywords:
+            result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
 
         return result
 
@@ -431,6 +430,9 @@ class Blog(object):
         blog.canonical = post.get("meta", {}).get(
             "rank_math_canonical_url", blog.canonical
         )
+
+        if keywords := post.get("meta", {}).get("rank_math_focus_keyword"):
+            blog.focus_keywords = keywords.split(",")
 
         if post.permalink_template and not blog.permalink_template:
             # keeping the permalink template registered in the blog metadata.
