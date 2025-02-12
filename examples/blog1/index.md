@@ -7,6 +7,7 @@ date: 2025-02-15 23:21:00+01:00
 excerpt: In this blog I would show you how to schedule serverless applications using
   Cloud Run and Cloud Scheduler
 focus-keywords: markdown upload wordpress
+guid: https://xebia.com/wp-json/wp/v2/posts/86328
 image: images/banner.jpg
 og:
   description: this goes to the Rankmath og description through meta
