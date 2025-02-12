@@ -10,7 +10,7 @@ name: Build and publish the container image
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       contents: read
       packages: write
