@@ -247,14 +247,14 @@ class Post(dict):
         returns urls to the og:image links
         """
         result = []
-        for name in ["rank_math_facebook_image", "rank_math_facebook_image"]:
+        for name in ["rank_math_twitter_image", "rank_math_facebook_image"]:
             if image := self.get("meta", {}).get(name):
                 result.append(urlparse(image))
         return result
 
     @property
     def og_description(self) -> Optional[str]:
-        return self.get("meta", {}).get("rank_math_twitter_description")
+        return self.get("meta", {}).get("rank_math_facebook_description")
 
     @property
     def permalink_template(self) -> Optional[str]:
