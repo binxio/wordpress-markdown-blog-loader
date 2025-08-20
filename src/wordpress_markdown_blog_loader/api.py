@@ -205,6 +205,18 @@ class Post(dict):
         return self.get("categories", [])
 
     @property
+    def industries_taxonomy(self) -> list[id]:
+        return self.get("industries_taxonomy", [])
+
+    @property
+    def partners_taxonomy(self) -> list[id]:
+        return self.get("partners_taxonomy", [])
+
+    @property
+    def capabilities(self) -> list[id]:
+        return self.get("capabilities", [])
+
+    @property
     def tags(self) -> list[int]:
         return self.get("tags", [])
 
@@ -417,6 +429,37 @@ class Wordpress(object):
 
     @property
     @cache
+    def industries_taxonomy(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("industries_taxonomy")}
+
+    @property
+    @cache
+    def industries_taxonomy_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.industries_taxonomy.items()}
+
+    @property
+    @cache
+    def partners_taxonomy(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("partners_taxonomy")}
+
+    @property
+    @cache
+    def partners_taxonomy_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.partners_taxonomy.items()}
+
+    @property
+    @cache
+    def capabilities(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("capabilities")}
+
+    @property
+    @cache
+    def capabilities_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.capabilities.items()}
+
+
+    @property
+    @cache
     def tags(self) -> Dict[str, int]:
         return {c["slug"]: c["id"] for c in self.get_all("tags")}
 
@@ -572,6 +615,37 @@ class Wordpress(object):
                 category, ",\n ".join(self.categories.keys())
             )
         )
+
+    def get_industry_taxonomy_by_name(self, slug: str) -> str:
+        if slug in self.industries_taxonomy:
+            return self.industries_taxonomy[slug]
+
+        raise ValueError(
+            "invalid industries_taxonomy '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.industries_taxonomy.keys())
+            )
+        )
+
+    def get_partners_taxonomy_by_name(self, slug: str) -> str:
+        if slug in self.partners_taxonomy:
+            return self.partners_taxonomy[slug]
+
+        raise ValueError(
+            "invalid partners_taxonomy '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.partners_taxonomy.keys())
+            )
+        )
+
+    def get_capabilities_by_name(self, slug: str) -> str:
+        if slug in self.capabilities:
+            return self.capabilities[slug]
+
+        raise ValueError(
+            "invalid capabilities '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.capabilities.keys())
+            )
+        )
+
 
     def get_tag_id_by_name(self, tag: str) -> str:
         if tag in self.tags:
