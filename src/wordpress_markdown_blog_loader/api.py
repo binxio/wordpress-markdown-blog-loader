@@ -616,22 +616,22 @@ class Wordpress(object):
             )
         )
 
-    def get_industry_taxonomy_by_name(self, slug: str) -> str:
+    def get_industry_by_name(self, slug: str) -> str:
         if slug in self.industries_taxonomy:
             return self.industries_taxonomy[slug]
 
         raise ValueError(
-            "invalid industries_taxonomy '{}' try one of\n {}".format(
+            "invalid industry '{}' try one of\n {}".format(
                 slug, ",\n ".join(self.industries_taxonomy.keys())
             )
         )
 
-    def get_partners_taxonomy_by_name(self, slug: str) -> str:
+    def get_partner_by_name(self, slug: str) -> str:
         if slug in self.partners_taxonomy:
             return self.partners_taxonomy[slug]
 
         raise ValueError(
-            "invalid partners_taxonomy '{}' try one of\n {}".format(
+            "invalid partner '{}' try one of\n {}".format(
                 slug, ",\n ".join(self.partners_taxonomy.keys())
             )
         )
@@ -641,7 +641,7 @@ class Wordpress(object):
             return self.capabilities[slug]
 
         raise ValueError(
-            "invalid capabilities '{}' try one of\n {}".format(
+            "invalid capability '{}' try one of\n {}".format(
                 slug, ",\n ".join(self.capabilities.keys())
             )
         )
