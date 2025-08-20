@@ -19,10 +19,10 @@ import requests
 
 def get_default_host() -> Optional[str]:
     """
-    returns the default api host from ~/.wordpress.ini
+    returns the default api host from .wordpress.ini and/or ~/.wordpress.ini
     """
     config = configparser.ConfigParser()
-    config.read(expanduser("~/.wordpress.ini"))
+    config.read([".wordpress.ini", expanduser("~/.wordpress.ini")])
     return config.defaults().get("host")
 
 
@@ -64,7 +64,7 @@ class WordpressEndpoint:
 
     def read_from_config(self, host: str):
         config = configparser.ConfigParser()
-        config.read(expanduser("~/.wordpress.ini"))
+        config.read([".wordpress.ini", expanduser("~/.wordpress.ini")])
 
         if not host:
             host = config.defaults().get("host")
