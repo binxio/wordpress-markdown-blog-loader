@@ -36,6 +36,7 @@ and add a section for your Wordpress installation:
 host = xebia.com
 
 [xebia.com]
+api_host = xebiainnovationproject.kinsta.cloud
 username = <your wordpress username>
 ```
 
