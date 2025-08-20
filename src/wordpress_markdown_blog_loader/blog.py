@@ -448,9 +448,9 @@ class Blog(object):
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
         blog.categories = [wordpress.categories_by_id[c] for c in post.categories]
-        blog.industries = [wordpress.industries_taxonomy_by_id for c in post.industries_taxonomy]
-        blog.partners = [wordpress.partners_taxonomy_by_id for c in post.partners_taxonomy]
-        blog.capabilities = [wordpress.capabilities_by_id for c in post.capabilities]
+        blog.industries = [wordpress.industries_taxonomy_by_id[c] for c in post.industries_taxonomy]
+        blog.partners = [wordpress.partners_taxonomy_by_id[c] for c in post.partners_taxonomy]
+        blog.capabilities = [wordpress.capabilities_by_id[c] for c in post.capabilities]
         if post.tags:
             blog.tags = [wordpress.tags_by_id[t] for t in post.tags]
         blog.date = post.date
