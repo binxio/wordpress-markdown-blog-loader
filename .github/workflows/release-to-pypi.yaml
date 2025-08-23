@@ -8,10 +8,10 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.10.16
+          python-version: 3.12
       - name: checkout
         run: git fetch --prune --unshallow
       - name: install environment
@@ -19,7 +19,7 @@ jobs:
       - name: build
         run: pipenv run make build
       - name: upload to pypi
-        uses: pypa/gh-action-pypi-publish@v1.1.0
+        uses: pypa/gh-action-pypi-publish@v1.12.4
         with:
           user: __token__
           password: ${{secrets.twine_password }}
