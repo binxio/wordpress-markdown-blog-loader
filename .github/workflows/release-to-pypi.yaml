@@ -20,7 +20,7 @@ jobs:
           pip install build
           pip install -e .
       - name: build
-        run: pipenv run make build
+        run: make build
       - name: upload to pypi
         uses: pypa/gh-action-pypi-publish@v1.12.4
         with:
