@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wordpress-markdown-blog-loader"
-version = "1.6.2"
+version = "1.6.3"
 authors = [{name = "Mark van Holsteijn", email = "markvanholsteijn@binx.io"}]
 license = {text = "APL2"}
 description = "load markdown blogs into wordpress"
