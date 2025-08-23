@@ -1,5 +1,6 @@
+---
 name: release-to-pypi
-on:
+"on":
   push:
     tags:
       - '*'
@@ -15,7 +16,9 @@ jobs:
       - name: checkout
         run: git fetch --prune --unshallow
       - name: install environment
-        run: pip install pipenv && pipenv sync -d 
+        run: |
+          pip install build
+          pip install -e .
       - name: build
         run: pipenv run make build
       - name: upload to pypi
