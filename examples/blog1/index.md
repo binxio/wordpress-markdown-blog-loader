@@ -7,13 +7,13 @@ date: 2025-02-15 23:21:00+01:00
 excerpt: In this blog I would show you how to schedule serverless applications using
   Cloud Run and Cloud Scheduler
 focus-keywords: markdown upload wordpress
-guid: https://xebia.com/wp-json/wp/v2/posts/86328
+guid: https://env-xebiainnovationproject-staging.kinsta.cloud/wp-json/wp/v2/posts/102254
 image: images/banner.jpg
 og:
   description: this goes to the Rankmath og description through meta
   image: images/og-banner.jpg
 slug: try-this-one-5
-status: draft
+status: publish
 subtitle: using Google Cloud Run and Cloud Scheduler
 title: Testing markdown upload through wordpress API
 ---
@@ -32,7 +32,7 @@ As I promote the principle of infrastructure as code, I will show you how to do 
 ### Create a service account
 You can create a service account for the scheduler with which to invoke the application as follows: 
 
-```hcl
+``` { .hcl .wp-block-code }
 resource "google_service_account" "scheduler" {
   display_name = "Google Cloud Scheduler"
   account_id   = "scheduler"
@@ -41,7 +41,7 @@ resource "google_service_account" "scheduler" {
 ### Deploy using your serverless application
 Next you can deploy your serverless application:
 
-```hcl
+```{ .hcl .wp-block-code }
 resource "google_cloud_run_service" "application" {
   name     = "application"
   location = "europe-west1"
@@ -64,7 +64,7 @@ in this case, the applicaton deployed is my trusty [paas-monitor](https://github
 ### Grant the scheduler permission
 After the application is deploy, you grant the service account permission to invoke it:
 
-```hcl
+```{ .hcl .wp-block-code }
 resource "google_cloud_run_service_iam_member" "scheduler-run-invoker" {
   role   = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.scheduler.email}"
@@ -77,7 +77,7 @@ resource "google_cloud_run_service_iam_member" "scheduler-run-invoker" {
 ### Create a schedule
 Finally you create a schedule to invoke the service as follows:
 
-```hcl
+```{ .hcl .wp-block-code }
 resource "google_cloud_scheduler_job" "application" {
   name        = "application"
   description = "invoke every 5 minutes"
@@ -97,7 +97,7 @@ resource "google_cloud_scheduler_job" "application" {
 The schedule is defined using a [cron expression](https://en.wikipedia.org/wiki/Cron). Note
 that Google Cloud Scheduler requires an app engine application to be deployed:
 
-```hcl
+```{ .hcl .wp-block-code }
 resource "google_app_engine_application" "app" {
   project     = data.google_project.current.project_id
   location_id = "europe-west"
@@ -108,7 +108,7 @@ resource "google_app_engine_application" "app" {
 ## Installation
 If you want to deploy the complete example, download [main.tf](./main.tf) and type:
 
-```bash
+```{ .bash .wp-block-code }
 export TF_VAR_project=$(gcloud config get-value project)
 terraform init
 terraform apply

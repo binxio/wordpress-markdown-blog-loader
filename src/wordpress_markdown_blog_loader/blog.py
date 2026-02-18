@@ -14,7 +14,9 @@ from PIL import Image
 from binx_og_image_generator import generate as generate_og_image
 from binx_og_image_generator.generator import Blog as ImageGeneratorBlog
 from markdown import markdown
+
 from wordpress_markdown_blog_loader.api import Post, Medium
+from wordpress_markdown_blog_loader import html_to_gutenberg
 from wordpress_markdown_blog_loader.api import Wordpress, WordpressEndpoint
 from wordpress_markdown_blog_loader.remove_newlines import (
     remove_newlines_from_paragraphs,
@@ -197,6 +199,30 @@ class Blog(object):
         self.blog.metadata["categories"] = categories
 
     @property
+    def industries(self):
+        return self.blog.metadata.get("industries", [])
+
+    @industries.setter
+    def industries(self, slugs: list[str]):
+        self.blog.metadata["industries"] = slugs
+
+    @property
+    def partners(self):
+        return self.blog.metadata.get("partners", [])
+
+    @partners.setter
+    def partners(self, slugs: list[str]):
+        self.blog.metadata["partners"] = slugs
+
+    @property
+    def capabilities(self) -> list[str]:
+        return self.blog.metadata.get("capabilities", [])
+
+    @capabilities.setter
+    def capabilities(self, slugs: list[str]):
+        self.blog.metadata["capabilities"] = slugs
+
+    @property
     def tags(self):
         return self.blog.metadata.get("tags", [])
 
@@ -282,9 +308,11 @@ class Blog(object):
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
         html = markdown(
-            content, extensions=["fenced_code", "attr_list", "tables", "footnotes"]
+            content, extensions=["fenced_code", "attr_list", "tables", "footnotes"],
         )
-        return remove_newlines_from_paragraphs(html)
+
+        html = remove_newlines_from_paragraphs(html)
+        return html_to_gutenberg.convert(self.title, html)
 
     @property
     def local_image_references(self) -> set[str]:
@@ -384,8 +412,10 @@ class Blog(object):
             "capabilities": [wp.get_capability_id_by_name(c) for c in self.capabilities],
             "tags": [wp.get_tag_id_by_name(c) for c in self.tags],
             "acf": {"show_header_image": bool(self.image)},
+            "industries_taxonomy": [wp.get_industry_by_name(c) for c in self.industries],
+            "partners_taxonomy": [wp.get_partner_by_name(c) for c in self.partners],
+            "capabilities": [wp.get_capabilities_by_name(c) for c in self.capabilities],
         }
-
         if self.permalink_template:
             result["permalink_template"] = self.permalink_template
 
@@ -430,6 +460,8 @@ class Blog(object):
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
         blog.categories = [wordpress.categories_by_id[c] for c in post.categories]
+        blog.industries = [wordpress.industries_taxonomy_by_id[c] for c in post.industries_taxonomy]
+        blog.partners = [wordpress.partners_taxonomy_by_id[c] for c in post.partners_taxonomy]
         blog.capabilities = [wordpress.capabilities_by_id[c] for c in post.capabilities]
         if post.tags:
             blog.tags = [wordpress.tags_by_id[t] for t in post.tags]

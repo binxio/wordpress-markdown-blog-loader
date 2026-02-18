@@ -1,9 +1,8 @@
 .PHONY: build
 build:
-	python setup.py check
-	python setup.py build
+	pip install build
 	rm -rf dist/*
-	python setup.py sdist
+	python -mbuild
 
 .PHONY: test
 test:

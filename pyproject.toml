@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools >= 77.0.3", "build","twine"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wordpress-markdown-blog-loader"
+version = "1.7.0"
+authors = [{name = "Mark van Holsteijn", email = "markvanholsteijn@binx.io"}]
+license = {text = "APL2"}
+description = "load markdown blogs into wordpress"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "requests",
+    "markdown",
+    "python-frontmatter",
+    "click",
+    "pytz",
+    "Pillow",
+    "binx-og-image-generator>=1.2.6",
+    "markdownify",
+    "bs4",
+    "html5lib",
+    "lxml",
+    "python-slugify",
+    "unidecode",
+    "stopwords",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/binxio/wordpress-markdown-blog-loader"
+
+[project.scripts]
+wp-md = "wordpress_markdown_blog_loader.__main__:main"
+
+[project.optional-dependencies]
+testing = [
+    "requests",
+    "markdown",
+    "python-frontmatter",
+    "click",
+    "pytz",
+    "Pillow",
+    "binx-og-image-generator>=1.2.6",
+    "markdownify",
+    "bs4",
+    "html5lib",
+    "lxml",
+    "python-slugify",
+    "pytest",
+    "unidecode",
+    "stopwords",
+]
+

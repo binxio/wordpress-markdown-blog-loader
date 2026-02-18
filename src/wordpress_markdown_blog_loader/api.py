@@ -19,10 +19,10 @@ import requests
 
 def get_default_host() -> Optional[str]:
     """
-    returns the default api host from ~/.wordpress.ini
+    returns the default api host from .wordpress.ini and/or ~/.wordpress.ini
     """
     config = configparser.ConfigParser()
-    config.read(expanduser("~/.wordpress.ini"))
+    config.read([".wordpress.ini", expanduser("~/.wordpress.ini")])
     return config.defaults().get("host")
 
 
@@ -64,7 +64,7 @@ class WordpressEndpoint:
 
     def read_from_config(self, host: str):
         config = configparser.ConfigParser()
-        config.read(expanduser("~/.wordpress.ini"))
+        config.read([".wordpress.ini", expanduser("~/.wordpress.ini")])
 
         if not host:
             host = config.defaults().get("host")
@@ -115,7 +115,8 @@ class WordpressEndpoint:
 
 class User(dict):
     def __init__(self, u):
-        self.update(u)
+        if u:
+            self.update(u)
 
     @property
     def name(self):
@@ -205,6 +206,18 @@ class Post(dict):
         return self.get("categories", [])
 
     @property
+    def industries_taxonomy(self) -> list[id]:
+        return self.get("industries_taxonomy", [])
+
+    @property
+    def partners_taxonomy(self) -> list[id]:
+        return self.get("partners_taxonomy", [])
+
+    @property
+    def capabilities(self) -> list[id]:
+        return self.get("capabilities", [])
+
+    @property
     def tags(self) -> list[int]:
         return self.get("tags", [])
 
@@ -247,14 +260,14 @@ class Post(dict):
         returns urls to the og:image links
         """
         result = []
-        for name in ["rank_math_facebook_image", "rank_math_facebook_image"]:
+        for name in ["rank_math_twitter_image", "rank_math_facebook_image"]:
             if image := self.get("meta", {}).get(name):
                 result.append(urlparse(image))
         return result
 
     @property
     def og_description(self) -> Optional[str]:
-        return self.get("meta", {}).get("rank_math_twitter_description")
+        return self.get("meta", {}).get("rank_math_facebook_description")
 
     @property
     def permalink_template(self) -> Optional[str]:
@@ -417,13 +430,33 @@ class Wordpress(object):
 
     @property
     @cache
-    def capabilities(self) -> Dict[str, int]:
-        return {c["slug"]: c["id"] for c in self.get_all("categories")}
+    def industries_taxonomy(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("industries_taxonomy")}
 
     @property
     @cache
-    def capabilities_by_id(self) -> Dict[int, str]:
-        return {id: slug for slug, id in self.capabilities.items()}
+    def industries_taxonomy_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.industries_taxonomy.items()}
+
+    @property
+    @cache
+    def partners_taxonomy(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("partners_taxonomy")}
+
+    @property
+    @cache
+    def partners_taxonomy_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.partners_taxonomy.items()}
+
+    @property
+    @cache
+    def capabilities(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("capabilities")}
+
+    @property
+    @cache
+    def capabilities_by_id(self) -> Dict[str, int]:
+        return  {id: slug for slug, id in self.capabilities.items()}
 
     @property
     @cache
@@ -583,15 +616,36 @@ class Wordpress(object):
             )
         )
 
-    def get_capability_id_by_name(self, capability: str) -> str:
-        if capability in self.capabilities:
-            return self.capabilities[capability]
+    def get_industry_by_name(self, slug: str) -> str:
+        if slug in self.industries_taxonomy:
+            return self.industries_taxonomy[slug]
 
         raise ValueError(
-            "invalid category '{}' try one of\n {}".format(
-                category, ",\n ".join(self.capabilities.keys())
+            "invalid industry '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.industries_taxonomy.keys())
             )
         )
+
+    def get_partner_by_name(self, slug: str) -> str:
+        if slug in self.partners_taxonomy:
+            return self.partners_taxonomy[slug]
+
+        raise ValueError(
+            "invalid partner '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.partners_taxonomy.keys())
+            )
+        )
+
+    def get_capabilities_by_name(self, slug: str) -> str:
+        if slug in self.capabilities:
+            return self.capabilities[slug]
+
+        raise ValueError(
+            "invalid capability '{}' try one of\n {}".format(
+                slug, ",\n ".join(self.capabilities.keys())
+            )
+        )
+
 
     def get_tag_id_by_name(self, tag: str) -> str:
         if tag in self.tags:
