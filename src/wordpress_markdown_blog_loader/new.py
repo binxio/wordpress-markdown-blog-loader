@@ -96,7 +96,7 @@ def command(title, subtitle, author, image, brand, email, image_credits, capabil
         + (", " + blog.subtitle if blog.subtitle else "")
     )
     if image_credits:
-        blog.content = f"\n\n___\n==={image_credits}"
+        blog.content = f"\n\n___\n{image_credits}"
     blog.save()
     logging.info("start editing index.md in %s", blog.dir)
 
