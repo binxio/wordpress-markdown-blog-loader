@@ -42,6 +42,7 @@ class ImageType(click.ParamType):
 @click.option("--email", required=False, help="of the author")
 @click.option("--image", required=False, type=ImageType(), help="for the banner")
 @click.option("--image-credits", required=False, type=str, help="for the used image")
+@click.option("--capability", required=False, multiple=True, help="for the used capabilities selection")
 @click.option(
     "--brand",
     type=click.Choice(["xebia.com", "binx.io"]),
@@ -49,12 +50,12 @@ class ImageType(click.ParamType):
     default="xebia.com",
     help="of the banner",
 )
-def command(title, subtitle, author, image, brand, email, image_credits):
+def command(title, subtitle, author, image, brand, email, image_credits, capability):
     """
     a new frontmatter blog
 
     the index.md will be written in a subdirectory with the name of the slug for the blog.
-    The slug is created from the title. The image will be resized and cropped to 1200x630.
+    The slug is created from the title. The image will be resized and cropped to 1440x460.
     """
     slug = slugify(title)
 
@@ -78,6 +79,8 @@ def command(title, subtitle, author, image, brand, email, image_credits):
     blog.date = (datetime.now().astimezone() + timedelta(days=7)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
+    if capability:
+        blog.capabilities = list(capability)
 
     if not blog.title:
         click.echo("a title is required", err=True)
@@ -93,33 +96,33 @@ def command(title, subtitle, author, image, brand, email, image_credits):
         + (", " + blog.subtitle if blog.subtitle else "")
     )
     if image_credits:
-        blog.content = f"\n\n___\n{image_credits}"
+        blog.content = f"\n\n___\n==={image_credits}"
     blog.save()
     logging.info("start editing index.md in %s", blog.dir)
 
 
 def save_og_image(image: Image, path: Path) -> Path:
     """
-    save the image to be the perfect og image size: 1200x630px
+    save the image to be the perfect og image size: 1440x460px
     """
     width, height = image.size
-    if width != 1200:
-        new_height = int(height * 1200 / width)
-        logging.info("resizing %dx%d to %dx%d", width, height, 1200, new_height)
-        image = image.resize((1200, new_height))
-        width = 1200
+    if width != 1440:
+        new_height = int(height * 1440 / width)
+        logging.info("resizing %dx%d to %dx%d", width, height, 1440, new_height)
+        image = image.resize((1440, new_height))
+        width = 1440
         width, height = image.size
 
-    if height > 630:
-        logging.info("cropping to maximum height of 630px")
-        top = int((height - 630) / 2)
-        bottom = 630 + top
-        image = image.crop((0, top, 1200, bottom))
+    if height > 460:
+        logging.info("cropping to maximum height of 460px")
+        top = int((height - 460) / 2)
+        bottom = 460 + top
+        image = image.crop((0, top, 1440, bottom))
         width, height = image.size
 
-    if height < 630:
-        new_image = Image.new("RGBA", (1200, 630), (255, 0, 0, 0))
-        new_image.paste(image, (0, int((630 - height) / 2)))
+    if height < 460:
+        new_image = Image.new("RGBA", (1440, 460), (255, 0, 0, 0))
+        new_image.paste(image, (0, int((460 - height) / 2)))
         image = new_image
 
     path.parent.mkdir(exist_ok=True, parents=True)
@@ -144,7 +147,7 @@ def update_banner_command(blog, image, brand):
     """
     of the blog.
 
-    reads the image, crops it to the 1200x630 dimensions and updates the blog's banner property.
+    reads the image, crops it to the 1440x460 dimensions and updates the blog's banner property.
     Regenerates and updates the og-banner too.
     """
     path = Path(blog).joinpath("index.md")

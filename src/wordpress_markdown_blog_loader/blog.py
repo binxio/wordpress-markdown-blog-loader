@@ -205,6 +205,14 @@ class Blog(object):
         self.blog.metadata["tags"] = tags
 
     @property
+    def capabilities(self):
+        return self.blog.metadata.get("capabilities", [])
+
+    @capabilities.setter
+    def capabilities(self, capabilities: list[str]):
+        self.blog.metadata["capabilities"] = capabilities
+
+    @property
     def guid(self):
         return self.blog.metadata.get("guid")
 
@@ -373,6 +381,7 @@ class Blog(object):
             "status": self.status,
             "author": author.id,
             "categories": [wp.get_category_id_by_name(c) for c in self.categories],
+            "capabilities": [wp.get_capability_id_by_name(c) for c in self.capabilities],
             "tags": [wp.get_tag_id_by_name(c) for c in self.tags],
             "acf": {"show_header_image": bool(self.image)},
         }
@@ -421,6 +430,7 @@ class Blog(object):
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
         blog.categories = [wordpress.categories_by_id[c] for c in post.categories]
+        blog.capabilities = [wordpress.capabilities_by_id[c] for c in post.capabilities]
         if post.tags:
             blog.tags = [wordpress.tags_by_id[t] for t in post.tags]
         blog.date = post.date

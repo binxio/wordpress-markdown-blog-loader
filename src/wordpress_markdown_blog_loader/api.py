@@ -417,6 +417,16 @@ class Wordpress(object):
 
     @property
     @cache
+    def capabilities(self) -> Dict[str, int]:
+        return {c["slug"]: c["id"] for c in self.get_all("categories")}
+
+    @property
+    @cache
+    def capabilities_by_id(self) -> Dict[int, str]:
+        return {id: slug for slug, id in self.capabilities.items()}
+
+    @property
+    @cache
     def tags(self) -> Dict[str, int]:
         return {c["slug"]: c["id"] for c in self.get_all("tags")}
 
@@ -570,6 +580,16 @@ class Wordpress(object):
         raise ValueError(
             "invalid category '{}' try one of\n {}".format(
                 category, ",\n ".join(self.categories.keys())
+            )
+        )
+
+    def get_capability_id_by_name(self, capability: str) -> str:
+        if capability in self.capabilities:
+            return self.capabilities[capability]
+
+        raise ValueError(
+            "invalid category '{}' try one of\n {}".format(
+                category, ",\n ".join(self.capabilities.keys())
             )
         )
 
