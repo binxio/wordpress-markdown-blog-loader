@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup, NavigableString, Comment
 
 
@@ -21,8 +22,13 @@ def _wrap_paragraph(element):
     return f"<!-- wp:paragraph -->\n{str(element)}\n<!-- /wp:paragraph -->"
 
 
+def _string_to_html_id(s: str) -> str:
+    return re.sub("[^a-z0-9-_]", "", re.sub(r"\s", "-", s.lower()))
+
+
 def _wrap_heading(element):
     element["class"] = ["wp-block-heading"]
+    element["id"] = _string_to_html_id(element.get_text().lower())
     return f"<!-- wp:heading -->\n{str(element)}\n<!-- /wp:heading -->"
 
 

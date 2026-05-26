@@ -3,7 +3,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 from urllib.parse import urlparse, ParseResult
 
 import bs4
@@ -81,11 +81,12 @@ class Blog(object):
         """
         return self.blog.metadata.get("focus-keywords")
 
-
     @focus_keywords.setter
     def focus_keywords(self, value):
         if value:
-            self.blog.metadata["focus-keywords"] = " ".join(value) if isinstance(value, list) else value
+            self.blog.metadata["focus-keywords"] = (
+                " ".join(value) if isinstance(value, list) else value
+            )
         else:
             self.blog.metadata.pop("focus-keywords", "")
 
@@ -99,7 +100,7 @@ class Blog(object):
 
     @property
     def author_id(self):
-        """ useful of the author has multiple user accounts on WP and we are not allowed to read
+        """useful of the author has multiple user accounts on WP and we are not allowed to read
         user's email addresses.
         """
         return self.blog.metadata.get("author-id")
@@ -300,7 +301,8 @@ class Blog(object):
 
         content = self.markdown_image_pattern.sub(replace_references, self.content)
         html = markdown(
-            content, extensions=["fenced_code", "attr_list", "tables", "footnotes"],
+            content,
+            extensions=["fenced_code", "attr_list", "tables", "footnotes"],
         )
 
         html = remove_newlines_from_paragraphs(html)
@@ -390,6 +392,21 @@ class Blog(object):
     def to_wordpress(self, wp: Wordpress) -> dict:
         author = wp.get_unique_user_by_name(self.author, self.email, self.author_id)
         self.upload_local_images(wp)
+        # Create missing tags.
+        tags: List[int] = []
+        for tag in self.tags:
+            num = wp.get_tag_id_by_name(tag)
+            if num is None:
+                num = wp.create_tag(tag)
+            tags.append(num)
+        # Create missing categories.
+        categories: List[int] = []
+        for cat in self.categories:
+            num = wp.get_category_id_by_name(cat)
+            if num is None:
+                num = wp.create_category(cat)
+            categories.append(num)
+        #
         result = {
             "title": self.title,
             "slug": self.slug,
@@ -399,11 +416,12 @@ class Blog(object):
             "content": self.rendered,
             "format": "standard",
             "status": self.status,
-            "author": author.id,
-            "categories": [wp.get_category_id_by_name(c) for c in self.categories],
-            "tags": [wp.get_tag_id_by_name(c) for c in self.tags],
+            "categories": categories,
+            "tags": tags,
             "acf": {"show_header_image": bool(self.image)},
-            "industries_taxonomy": [wp.get_industry_by_name(c) for c in self.industries],
+            "industries_taxonomy": [
+                wp.get_industry_by_name(c) for c in self.industries
+            ],
             "partners_taxonomy": [wp.get_partner_by_name(c) for c in self.partners],
             "capabilities": [wp.get_capabilities_by_name(c) for c in self.capabilities],
         }
@@ -424,7 +442,9 @@ class Blog(object):
             result["meta"]["rank_math_canonical_url"] = self.canonical
 
         if self.focus_keywords:
-            result["meta"]["rank_math_focus_keyword"] = ','.join(self.focus_keywords.split())
+            result["meta"]["rank_math_focus_keyword"] = ",".join(
+                self.focus_keywords.split()
+            )
 
         return result
 
@@ -451,8 +471,12 @@ class Blog(object):
         blog.author = wordpress.get_user_by_id(post.author).name
         blog.guid = post.guid
         blog.categories = [wordpress.categories_by_id[c] for c in post.categories]
-        blog.industries = [wordpress.industries_taxonomy_by_id[c] for c in post.industries_taxonomy]
-        blog.partners = [wordpress.partners_taxonomy_by_id[c] for c in post.partners_taxonomy]
+        blog.industries = [
+            wordpress.industries_taxonomy_by_id[c] for c in post.industries_taxonomy
+        ]
+        blog.partners = [
+            wordpress.partners_taxonomy_by_id[c] for c in post.partners_taxonomy
+        ]
         blog.capabilities = [wordpress.capabilities_by_id[c] for c in post.capabilities]
         if post.tags:
             blog.tags = [wordpress.tags_by_id[t] for t in post.tags]

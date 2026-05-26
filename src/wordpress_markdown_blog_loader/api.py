@@ -577,6 +577,30 @@ class Wordpress(object):
             raise Exception(response.text)
         return Post(response.json())
 
+    def create_tag(self, name: str) -> int:
+        print(f"INFO: creating tag {name}")
+        response = self.session.post(
+            f"{self.url}/tags",
+            json=dict(name=name),
+            auth=self.auth,
+            headers=self.headers,
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception(response.text)
+        return response.json()["id"]
+
+    def create_category(self, name: str) -> int:
+        print(f"INFO: creating category {name}")
+        response = self.session.post(
+            f"{self.url}/categories",
+            json=dict(name=name),
+            auth=self.auth,
+            headers=self.headers,
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception(response.text)
+        return response.json()["id"]
+
     def create_post(self, properties: dict) -> "Post":
         response = self.session.post(
             f"{self.url}/posts",
@@ -607,15 +631,8 @@ class Wordpress(object):
 
         categories = {c["slug"]: c["id"] for c in self.get_all("categories")}
 
-    def get_category_id_by_name(self, category: str) -> str:
-        if category in self.categories:
-            return self.categories[category]
-
-        raise ValueError(
-            "invalid category '{}' try one of\n {}".format(
-                category, ",\n ".join(self.categories.keys())
-            )
-        )
+    def get_category_id_by_name(self, category: str) -> Optional[int]:
+        return self.categories.get(category)
 
     def get_industry_by_name(self, slug: str) -> str:
         if slug in self.industries_taxonomy:
@@ -627,7 +644,7 @@ class Wordpress(object):
             )
         )
 
-    def get_partner_by_name(self, slug: str) -> str:
+    def get_partner_by_name(self, slug: str) -> int:
         if slug in self.partners_taxonomy:
             return self.partners_taxonomy[slug]
 
@@ -637,7 +654,7 @@ class Wordpress(object):
             )
         )
 
-    def get_capabilities_by_name(self, slug: str) -> str:
+    def get_capabilities_by_name(self, slug: str) -> int:
         if slug in self.capabilities:
             return self.capabilities[slug]
 
@@ -648,12 +665,5 @@ class Wordpress(object):
         )
 
 
-    def get_tag_id_by_name(self, tag: str) -> str:
-        if tag in self.tags:
-            return self.tags[tag]
-
-        raise ValueError(
-            "invalid tag '{}' try one of\n {}".format(
-                tag, ",\n ".join(self.tags.keys())
-            )
-        )
+    def get_tag_id_by_name(self, tag: str) -> Optional[int]:
+        return self.tags.get(tag)
