@@ -9,5 +9,7 @@ RUN     apt-get update && \
         apt-get remove -y libxslt1-dev libxml2-dev gcc libfreetype6-dev libffi-dev python3-dev libjpeg-dev  zlib1g-dev && \
         apt-get -y autoclean
 
+ENV APP_VERSION=1.7.0
+
 WORKDIR    /workspace
 ENTRYPOINT ["/usr/local/bin/wp-md"]
