@@ -14,6 +14,10 @@ def _wrap_in_gutenberg_comments(element):
         return _wrap_list(element)
     if element.name == "img":
         return _wrap_image(element)
+    if element.name == "figure" and "wp-block-audio" in element.get("class", []):
+        return _wrap_audio(element)
+    if element.name == "audio":
+        return _wrap_audio(element)
     if element.name == "blockquote":
         return _wrap_quote(element)
     return str(element)
@@ -84,6 +88,24 @@ def _wrap_list(element):
 
 def _wrap_image(element):
     return f"<!-- wp:image -->\n{str(element)}\n<!-- /wp:image -->"
+
+
+def _wrap_audio(element):
+    """
+    Wrap an audio element in a wp:audio Gutenberg block. Accepts either a bare
+    <audio> tag or a <figure class="wp-block-audio"> already wrapping one, and
+    always emits the figure form Wordpress expects.
+
+    >>> from bs4 import BeautifulSoup
+    >>> soup = BeautifulSoup('<audio controls src="https://x/c.mp3"></audio>', "html.parser")
+    >>> _wrap_audio(soup.audio)
+    '<!-- wp:audio -->\\n<figure class="wp-block-audio"><audio controls="" src="https://x/c.mp3"></audio></figure>\\n<!-- /wp:audio -->'
+    """
+    audio = element if element.name == "audio" else element.find("audio")
+    figure = (
+        f'<figure class="wp-block-audio">{str(audio)}</figure>' if audio else str(element)
+    )
+    return f"<!-- wp:audio -->\n{figure}\n<!-- /wp:audio -->"
 
 
 def convert(title, html_body):

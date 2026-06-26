@@ -5,6 +5,7 @@ in your favorite editor and keeps all your blogs in git.
 ## features
 - converts markdown into plain html, with syntax hightlighting support
 - uploads and synchronizes any locally referenced images
+- embeds audio players from locally referenced sound files
 - generates an opengraph image including the title, subtitle and author in Binx.io or xebia.com style
 - sets the Rankmath focus keywords
 - sets the canonical url, if specified
@@ -121,6 +122,21 @@ To add an image to your blog, add the images in the ./images subdirectory and ad
 ```markdown
 ![](./images/architecture.png)
 ```
+
+## adding audio
+To embed an audio player, add the sound file in a subdirectory (for example `./audio`)
+and add an `::: audio` directive on its own line, with a relative reference. For instance:
+
+```markdown
+## Listen to this section
+
+::: audio ./audio/section-one.mp3
+```
+
+The sound file is uploaded and synchronized just like an image, and rendered as a native
+Wordpress audio block (a player with controls) at that position. Drop one directive under
+each heading to give every section its own player. Remote URLs (`https://...`) are embedded
+as-is without uploading.
 
 ## uploading a blog
 To upload a blog, type:
