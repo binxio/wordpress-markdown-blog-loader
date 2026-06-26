@@ -50,7 +50,7 @@ We recommend to store  your application password in 1password and set the enviro
   WP_APP_PASSWORD using the [1password CLI](https://developer.1password.com/docs/cli):
 
 ```shell
-WP_APP_PASSWORD="$(op read "op://Private/wordpress app password/password")" wp-md ...
+WP_APP_PASSWORD="op://Private/wordpress app password/password" wp-md ...
 ```
 
 ## Never touch the WP editor again
