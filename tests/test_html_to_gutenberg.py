@@ -1,3 +1,4 @@
+import re
 import unittest
 from bs4 import BeautifulSoup, NavigableString, Comment
 
@@ -8,6 +9,7 @@ from wordpress_markdown_blog_loader.html_to_gutenberg import (
     _wrap_list,
     _wrap_image,
     _wrap_in_gutenberg_comments,
+    _wrap_quote,
     convert,
 )
 
@@ -91,6 +93,12 @@ class TestGutenbergWrapFunctions(unittest.TestCase):
         res = _wrap_in_gutenberg_comments(span_elem)
         self.assertEqual(res, "<span>custom</span>")
 
+    def test_wrap_in_gutenberg_quote(self):
+        soup = BeautifulSoup("<blockquote>quotie quote</blockquote>", "html.parser")
+        elem = soup.blockquote
+        result = _wrap_quote(elem)
+        self.assertEqual(result, '<!-- wp:quote -->\n<blockquote class="wp-block-quote">quotie quote</blockquote>\n<!-- /wp:quote -->')
+
 
 import unittest
 
@@ -132,7 +140,6 @@ class TestConvertFunction(unittest.TestCase):
         self.assertIn("<!-- wp:paragraph -->", result)
         self.assertIn("<!-- wp:heading -->", result)
         self.assertIn("<!-- wp:code -->", result)
-
 
 if __name__ == "__main__":
     unittest.main()

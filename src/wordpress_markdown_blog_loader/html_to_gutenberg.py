@@ -14,11 +14,18 @@ def _wrap_in_gutenberg_comments(element):
         return _wrap_list(element)
     if element.name == "img":
         return _wrap_image(element)
+    if element.name == "blockquote":
+        return _wrap_quote(element)
     return str(element)
 
 
 def _wrap_paragraph(element):
     return f"<!-- wp:paragraph -->\n{str(element)}\n<!-- /wp:paragraph -->"
+
+def _wrap_quote(element):
+    element["class"] = ["wp-block-quote"]
+    # todo: wrap child elements too.
+    return f"<!-- wp:quote -->\n{str(element)}\n<!-- /wp:quote -->"
 
 
 def _wrap_heading(element):
