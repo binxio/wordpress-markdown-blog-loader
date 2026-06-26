@@ -1,12 +1,11 @@
 import configparser
-import json
 import logging
 import mimetypes
 import os
 import re
-import sys
+import subprocess
 from datetime import datetime
-from functools import cache
+from functools import cache, lru_cache
 from os.path import expanduser
 from pathlib import Path
 from typing import List, Dict, Iterator
@@ -24,6 +23,21 @@ def get_default_host() -> Optional[str]:
     config = configparser.ConfigParser()
     config.read([".wordpress.ini", expanduser("~/.wordpress.ini")])
     return config.defaults().get("host")
+
+
+@lru_cache
+def get_from_1password(password: str) -> str:
+    """
+    returns the password from 1password vault, if the password has the op:// prefix.
+    """
+    if not password.startswith("op://"):
+        return password
+    result = subprocess.run(
+        ["op", "read", password],
+        check=True,
+        capture_output=True,
+    )
+    return result.stdout.decode("utf-8").rstrip("\n")
 
 
 def get_password(host: str) -> Optional[str]:
@@ -46,10 +60,10 @@ def get_password(host: str) -> Optional[str]:
     'default_password'
     """
     h = re.sub(r"[^a-zA-Z-0-9]", "_", host).upper()
-    if result := os.getenv(f"WP_APP_PASSWORD_{h}"):
-        return result
+    if result := os.getenv(f"WP_APP_PASSWORD_{h}", os.getenv("WP_APP_PASSWORD")):
+        return get_from_1password(result)
 
-    return os.getenv("WP_APP_PASSWORD")
+    return None
 
 
 class WordpressEndpoint:
@@ -290,7 +304,7 @@ class Wordpress(object):
         self._media: List[Medium] = {}
         self.headers = {
             "accept": "application/json",
-            "User-Agent": "wordpress-blog-uploader/" + self.app_version
+            "User-Agent": "wordpress-blog-uploader/" + self.app_version,
         }
         self.session = requests.Session()
 
@@ -436,7 +450,7 @@ class Wordpress(object):
     @property
     @cache
     def industries_taxonomy_by_id(self) -> Dict[str, int]:
-        return  {id: slug for slug, id in self.industries_taxonomy.items()}
+        return {id: slug for slug, id in self.industries_taxonomy.items()}
 
     @property
     @cache
@@ -446,7 +460,7 @@ class Wordpress(object):
     @property
     @cache
     def partners_taxonomy_by_id(self) -> Dict[str, int]:
-        return  {id: slug for slug, id in self.partners_taxonomy.items()}
+        return {id: slug for slug, id in self.partners_taxonomy.items()}
 
     @property
     @cache
@@ -456,7 +470,7 @@ class Wordpress(object):
     @property
     @cache
     def capabilities_by_id(self) -> Dict[str, int]:
-        return  {id: slug for slug, id in self.capabilities.items()}
+        return {id: slug for slug, id in self.capabilities.items()}
 
     @property
     @cache
@@ -645,7 +659,6 @@ class Wordpress(object):
                 slug, ",\n ".join(self.capabilities.keys())
             )
         )
-
 
     def get_tag_id_by_name(self, tag: str) -> str:
         if tag in self.tags:

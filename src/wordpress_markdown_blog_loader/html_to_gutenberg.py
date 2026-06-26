@@ -24,7 +24,7 @@ def _wrap_paragraph(element):
 
 
 def _wrap_quote(element):
-    element["class"] = ["wp-block-quote"]
+    element["class"] = ["wp-block-quote is-layout-flow wp-block-quote-is-layout-flow"]
     # Wrap nested elements
     for child in list(element.contents):
         if isinstance(child, (NavigableString, Comment)):
@@ -34,8 +34,7 @@ def _wrap_quote(element):
         # Since _wrap_in_gutenberg_comments returns a string,
         # we replace the child with a NavigableString of that result
         wrapped_child = _wrap_in_gutenberg_comments(child)
-        if wrapped_child != str(child):
-            child.replace_with(BeautifulSoup(wrapped_child, "html.parser"))
+        child.replace_with(BeautifulSoup(wrapped_child, "html.parser"))
 
     return f"<!-- wp:quote -->\n{str(element)}\n<!-- /wp:quote -->"
 

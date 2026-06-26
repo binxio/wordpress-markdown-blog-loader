@@ -97,7 +97,10 @@ class TestGutenbergWrapFunctions(unittest.TestCase):
         soup = BeautifulSoup("<blockquote>quotie quote</blockquote>", "html.parser")
         elem = soup.blockquote
         result = _wrap_quote(elem)
-        self.assertEqual(result, '<!-- wp:quote -->\n<blockquote class="wp-block-quote">quotie quote</blockquote>\n<!-- /wp:quote -->')
+        self.assertEqual(
+            result,
+            '<!-- wp:quote -->\n<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">quotie quote</blockquote>\n<!-- /wp:quote -->',
+        )
 
     def test_wrap_quote_nested_elements(self):
         html = "<blockquote><p>Quote line 1</p><p>Quote line 2</p></blockquote>"
@@ -153,6 +156,7 @@ class TestConvertFunction(unittest.TestCase):
         self.assertIn("<!-- wp:paragraph -->", result)
         self.assertIn("<!-- wp:heading -->", result)
         self.assertIn("<!-- wp:code -->", result)
+
 
 if __name__ == "__main__":
     unittest.main()
