@@ -458,7 +458,6 @@ class Wordpress(object):
     def capabilities_by_id(self) -> Dict[str, int]:
         return  {id: slug for slug, id in self.capabilities.items()}
 
-
     @property
     @cache
     def tags(self) -> Dict[str, int]:
