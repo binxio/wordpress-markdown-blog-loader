@@ -409,12 +409,11 @@ class Blog(object):
             "status": self.status,
             "author": author.id,
             "categories": [wp.get_category_id_by_name(c) for c in self.categories],
-            "capabilities": [wp.get_capability_id_by_name(c) for c in self.capabilities],
             "tags": [wp.get_tag_id_by_name(c) for c in self.tags],
             "acf": {"show_header_image": bool(self.image)},
             "industries_taxonomy": [wp.get_industry_by_name(c) for c in self.industries],
             "partners_taxonomy": [wp.get_partner_by_name(c) for c in self.partners],
-            "capabilities": [wp.get_capabilities_by_name(c) for c in self.capabilities],
+            "capabilities": [wp.get_capability_by_name(c) for c in self.capabilities],
         }
         if self.permalink_template:
             result["permalink_template"] = self.permalink_template

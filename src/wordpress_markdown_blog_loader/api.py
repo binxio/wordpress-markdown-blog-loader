@@ -650,7 +650,7 @@ class Wordpress(object):
             )
         )
 
-    def get_capabilities_by_name(self, slug: str) -> str:
+    def get_capability_by_name(self, slug: str) -> str:
         if slug in self.capabilities:
             return self.capabilities[slug]
 
