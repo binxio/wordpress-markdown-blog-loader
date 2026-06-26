@@ -22,9 +22,21 @@ def _wrap_in_gutenberg_comments(element):
 def _wrap_paragraph(element):
     return f"<!-- wp:paragraph -->\n{str(element)}\n<!-- /wp:paragraph -->"
 
+
 def _wrap_quote(element):
     element["class"] = ["wp-block-quote"]
-    # todo: wrap child elements too.
+    # Wrap nested elements
+    for child in list(element.contents):
+        if isinstance(child, (NavigableString, Comment)):
+            continue
+
+        # We need to wrap the child in Gutenberg comments
+        # Since _wrap_in_gutenberg_comments returns a string,
+        # we replace the child with a NavigableString of that result
+        wrapped_child = _wrap_in_gutenberg_comments(child)
+        if wrapped_child != str(child):
+            child.replace_with(BeautifulSoup(wrapped_child, "html.parser"))
+
     return f"<!-- wp:quote -->\n{str(element)}\n<!-- /wp:quote -->"
 
 
