@@ -8,6 +8,7 @@ from wordpress_markdown_blog_loader.html_to_gutenberg import (
     _wrap_pre,
     _wrap_list,
     _wrap_image,
+    _wrap_audio,
     _wrap_in_gutenberg_comments,
     _wrap_quote,
     convert,
@@ -76,6 +77,31 @@ class TestGutenbergWrapFunctions(unittest.TestCase):
         self.assertTrue(res.startswith("<!-- wp:image -->"))
         self.assertIn('<img alt="desc" src="img.png"/>', res)
         self.assertTrue(res.endswith("<!-- /wp:image -->"))
+
+    def test_wrap_audio_from_bare_tag(self):
+        soup = BeautifulSoup(
+            '<audio controls src="https://x/c.mp3"></audio>', "html.parser"
+        )
+        res = _wrap_audio(soup.audio)
+        self.assertTrue(res.startswith("<!-- wp:audio -->"))
+        self.assertIn('<figure class="wp-block-audio">', res)
+        self.assertIn('src="https://x/c.mp3"', res)
+        self.assertIn("<audio", res)
+        self.assertTrue(res.endswith("<!-- /wp:audio -->"))
+
+    def test_wrap_audio_from_figure(self):
+        html = '<figure class="wp-block-audio"><audio controls src="https://x/c.mp3"></audio></figure>'
+        soup = BeautifulSoup(html, "html.parser")
+        res = _wrap_audio(soup.figure)
+        self.assertTrue(res.startswith("<!-- wp:audio -->"))
+        self.assertIn('<figure class="wp-block-audio">', res)
+        self.assertIn('src="https://x/c.mp3"', res)
+
+    def test_wrap_in_gutenberg_comments_routes_audio_figure(self):
+        html = '<figure class="wp-block-audio"><audio controls src="https://x/c.mp3"></audio></figure>'
+        soup = BeautifulSoup(html, "html.parser")
+        res = _wrap_in_gutenberg_comments(soup.figure)
+        self.assertTrue(res.startswith("<!-- wp:audio -->"))
 
     def test_wrap_in_gutenberg_comments_with_comment(self):
         comment = Comment(" a comment ")
@@ -156,6 +182,18 @@ class TestConvertFunction(unittest.TestCase):
         self.assertIn("<!-- wp:paragraph -->", result)
         self.assertIn("<!-- wp:heading -->", result)
         self.assertIn("<!-- wp:code -->", result)
+
+    def test_convert_with_audio(self):
+        title = "Audio"
+        html_body = (
+            '<h2>Section</h2>'
+            '<figure class="wp-block-audio">'
+            '<audio controls src="https://x/c.mp3"></audio></figure>'
+        )
+        result = convert(title, html_body)
+        self.assertIn("<!-- wp:heading -->", result)
+        self.assertIn("<!-- wp:audio -->", result)
+        self.assertIn('<figure class="wp-block-audio">', result)
 
 
 if __name__ == "__main__":

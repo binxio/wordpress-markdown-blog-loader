@@ -29,8 +29,13 @@ class Blog(object):
         self.path: Path = None
         self.blog: frontmatter.Post = frontmatter.Post(content="")
         self.uploaded_images: dict[str, Media] = {}
+        self.uploaded_audio: dict[str, Medium] = {}
         self.markdown_image_pattern = re.compile(
             r'\!\[(?P<alt_text>[^]]*)\]\((?P<url>.*?)(?P<caption>\s*"[^"]*?")?\)'
+        )
+        # An audio player directive on its own line: `::: audio path/to/clip.mp3`
+        self.audio_directive_pattern = re.compile(
+            r"^[ \t]*:::[ \t]+audio[ \t]+(?P<url>\S+)[ \t]*$", re.MULTILINE
         )
 
     @staticmethod
@@ -306,7 +311,19 @@ class Blog(object):
                 return f"![{match.group('alt_text')}]({image.url}{caption})"
             return match.group(0)
 
+        def replace_audio_directive(match: re.Match):
+            url = match.group("url")
+            audio = self.uploaded_audio.get(url)
+            src = audio.url if audio else url
+            # raw block-level HTML; python-markdown passes it through untouched,
+            # and html_to_gutenberg turns it into a wp:audio block.
+            return (
+                f'<figure class="wp-block-audio">'
+                f'<audio controls src="{src}"></audio></figure>'
+            )
+
         content = self.markdown_image_pattern.sub(replace_references, self.content)
+        content = self.audio_directive_pattern.sub(replace_audio_directive, content)
         html = markdown(
             content, extensions=["fenced_code", "attr_list", "tables", "footnotes"],
         )
@@ -395,9 +412,41 @@ class Blog(object):
             slug = self.slug + "-" + re.sub(r"[/\.\\]+", "-", path.stem.strip("-"))
             self.uploaded_images[filename] = wp.upload_media(slug, path)
 
+    @property
+    def local_audio_references(self) -> set[str]:
+        """
+        Local audio files referenced by `::: audio <path>` directives.
+
+        >>> b = Blog()
+        >>> b.content = "## H\\n\\n::: audio images/clip.mp3\\n\\ntext\\n"
+        >>> sorted(b.local_audio_references)
+        ['images/clip.mp3']
+        """
+        return set(
+            filter(
+                lambda u: urlparse(u).scheme in ["", "file"],
+                map(
+                    lambda m: m.group("url"),
+                    re.finditer(self.audio_directive_pattern, self.content),
+                ),
+            )
+        )
+
+    def upload_local_audio(self, wp: Wordpress):
+        self.uploaded_audio = {}
+        for filename in self.local_audio_references:
+            path = Path(self.dir).joinpath(filename)
+            if not path.exists():
+                logging.warning("%s does not exist", path)
+                continue
+
+            slug = self.slug + "-" + re.sub(r"[/\.\\]+", "-", path.stem.strip("-"))
+            self.uploaded_audio[filename] = wp.upload_media(slug, path)
+
     def to_wordpress(self, wp: Wordpress) -> dict:
         author = wp.get_unique_user_by_name(self.author, self.email, self.author_id)
         self.upload_local_images(wp)
+        self.upload_local_audio(wp)
         result = {
             "title": self.title,
             "slug": self.slug,
