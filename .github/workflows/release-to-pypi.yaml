@@ -8,11 +8,12 @@ jobs:
   build:
     name: release
     runs-on: ubuntu-latest
+    if: github.event.base_ref == 'refs/heads/master' || github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: 3.13
       - name: checkout
         run: git fetch --prune --unshallow
       - name: install environment
