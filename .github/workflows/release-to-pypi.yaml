@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/og-binx-image-generator
+      url: https://pypi.org/p/wordpress-markdown-blog-loader
     if: github.event.base_ref == 'refs/heads/main' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v7
