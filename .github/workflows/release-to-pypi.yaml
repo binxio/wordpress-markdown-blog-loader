@@ -8,6 +8,9 @@ jobs:
   build:
     name: release
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/og-binx-image-generator
     if: github.event.base_ref == 'refs/heads/main' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v7
@@ -23,8 +26,6 @@ jobs:
       - name: build
         run: make build
       - name: upload to pypi
-        uses: pypa/gh-action-pypi-publish@v1.12.4
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.twine_password }}
           packages_dir: dist/
