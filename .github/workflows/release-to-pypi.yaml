@@ -8,6 +8,8 @@ jobs:
   build:
     name: release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     environment:
       name: pypi
       url: https://pypi.org/p/wordpress-markdown-blog-loader
