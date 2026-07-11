@@ -52,7 +52,7 @@ class Blog(object):
 
     def save(self):
         os.makedirs(self.dir, exist_ok=True)
-        with open(self.path, "wb") as f:
+        with open(self.path, "w") as f:
             frontmatter.dump(self.blog, f)
 
     @property
