@@ -20,7 +20,23 @@ def _wrap_in_gutenberg_comments(element):
         return _wrap_audio(element)
     if element.name == "blockquote":
         return _wrap_quote(element)
-    return str(element)
+    return _wrap_html(element)
+
+
+def _wrap_html(element):
+    """
+    Wrap an element without a dedicated Gutenberg block, such as a table, in a
+    wp:html (Custom HTML) block. Wordpress does not render HTML that sits
+    outside a block in the content section, so the element would be missing
+    from the published post. The block renders its content verbatim, so
+    classes like fancy-table are kept and no whitespace is added.
+
+    >>> from bs4 import BeautifulSoup
+    >>> soup = BeautifulSoup('<table class="fancy-table"><tr><td>1</td></tr></table>', "html.parser")
+    >>> _wrap_html(soup.table)
+    '<!-- wp:html --><table class="fancy-table"><tr><td>1</td></tr></table><!-- /wp:html -->'
+    """
+    return f"<!-- wp:html -->{str(element)}<!-- /wp:html -->"
 
 
 def _wrap_paragraph(element):

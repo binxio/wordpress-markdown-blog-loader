@@ -9,6 +9,7 @@ from wordpress_markdown_blog_loader.html_to_gutenberg import (
     _wrap_list,
     _wrap_image,
     _wrap_audio,
+    _wrap_html,
     _wrap_in_gutenberg_comments,
     _wrap_quote,
     convert,
@@ -114,10 +115,21 @@ class TestGutenbergWrapFunctions(unittest.TestCase):
         self.assertEqual(res, "just text")
 
     def test_wrap_in_gutenberg_comments_fallback(self):
-        soup = BeautifulSoup("<span>custom</span>", "html.parser")
-        span_elem = soup.span
-        res = _wrap_in_gutenberg_comments(span_elem)
-        self.assertEqual(res, "<span>custom</span>")
+        soup = BeautifulSoup("<div>custom</div>", "html.parser")
+        res = _wrap_in_gutenberg_comments(soup.div)
+        self.assertEqual(res, "<!-- wp:html --><div>custom</div><!-- /wp:html -->")
+
+    def test_wrap_html_keeps_table_verbatim(self):
+        html = '<table class="fancy-table"><thead><tr><th>A</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>'
+        soup = BeautifulSoup(html, "html.parser")
+        res = _wrap_html(soup.table)
+        self.assertEqual(res, f"<!-- wp:html -->{html}<!-- /wp:html -->")
+
+    def test_wrap_in_gutenberg_comments_routes_table(self):
+        soup = BeautifulSoup("<table><tr><td>1</td></tr></table>", "html.parser")
+        res = _wrap_in_gutenberg_comments(soup.table)
+        self.assertTrue(res.startswith("<!-- wp:html --><table>"))
+        self.assertTrue(res.endswith("</table><!-- /wp:html -->"))
 
     def test_wrap_in_gutenberg_quote(self):
         soup = BeautifulSoup("<blockquote>quotie quote</blockquote>", "html.parser")
@@ -194,6 +206,13 @@ class TestConvertFunction(unittest.TestCase):
         self.assertIn("<!-- wp:heading -->", result)
         self.assertIn("<!-- wp:audio -->", result)
         self.assertIn('<figure class="wp-block-audio">', result)
+
+    def test_convert_wraps_table_in_html_block(self):
+        title = "Table"
+        table = '<table class="fancy-table"><tr><td>1</td></tr></table>'
+        html_body = f"<p>Before</p>\n{table}\n<p>After</p>"
+        result = convert(title, html_body)
+        self.assertIn(f"<!-- wp:html -->{table}<!-- /wp:html -->", result)
 
 
 if __name__ == "__main__":
