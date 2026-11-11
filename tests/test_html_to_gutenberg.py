@@ -107,7 +107,7 @@ class TestGutenbergWrapFunctions(unittest.TestCase):
     def test_wrap_in_gutenberg_comments_with_comment(self):
         comment = Comment(" a comment ")
         res = _wrap_in_gutenberg_comments(comment)
-        self.assertEqual(res, str(comment))
+        self.assertEqual(res, "<!-- a comment -->")
 
     def test_wrap_in_gutenberg_comments_with_navigablestring(self):
         ns = NavigableString("just text")
@@ -213,6 +213,13 @@ class TestConvertFunction(unittest.TestCase):
         html_body = f"<p>Before</p>\n{table}\n<p>After</p>"
         result = convert(title, html_body)
         self.assertIn(f"<!-- wp:html -->{table}<!-- /wp:html -->", result)
+
+    def test_convert_keeps_html_comments(self):
+        title = "Comment"
+        html_body = "<p>Text</p>\n<!-- a note -->"
+        result = convert(title, html_body)
+        self.assertIn("<!-- a note -->", result)
+        self.assertNotIn("\n a note \n", result)
 
 
 if __name__ == "__main__":

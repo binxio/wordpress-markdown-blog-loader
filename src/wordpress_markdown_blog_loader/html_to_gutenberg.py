@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup, NavigableString, Comment
 
 
 def _wrap_in_gutenberg_comments(element):
-    if isinstance(element, (NavigableString, Comment)):
+    if isinstance(element, Comment):
+        return f"<!--{element}-->"
+    if isinstance(element, NavigableString):
         return str(element)
     if element.name == "p":
         return _wrap_paragraph(element)
